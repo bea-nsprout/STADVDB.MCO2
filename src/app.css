@@ -8,6 +8,7 @@
     --color-accent: #FE6400;
     --color-secondary: black;
     --color-primary: white;
+    --color-outline: #9f9f9f;
     --color-bg: #f2f2f2;
 
     font-size: 20px;
@@ -30,4 +31,31 @@ article.train-map-right {
     right: 2rem;
     top: 5rem;
     position: absolute;
+}
+
+/* Dropdown Button */
+input, select {
+    border: var(--color-outline) solid 1px;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    cursor: pointer;
+    height: 1.4rem;
+    color: var(--color-outline);
+}
+.label {
+    width: 8rem;
+}
+
+/* Dropdown button on hover & focus */
+input:hover, input:focus ,
+select:hover, select:focus {
+    color: var(--color-accent) !important;
+    border: var(--color-accent) solid 1px;
+}
+.bi {
+    color: var(--color-outline);
+}
+hr {
+    border: var(--color-bg) solid 1px;
 }
