@@ -5,8 +5,6 @@
 	import Row from '$lib/components/book-train/Row.svelte';
 
 	let stationsMenu = ["Tokyo", "Shin-Yokohoma", "Toyohashi", "Nagoya", "Kyoto", "Shin-Osaka"]
-	let stationFrom = $state("");
-	let stationTo = $state("");
 
 	let trains =
 	[
@@ -32,7 +30,20 @@
 			capacity: [18, 64, 80]
 		}
 	]
-	let psngrCount = $state(0);
+
+	let form = $state({
+		stationFrom: "",
+		stationTo: "",
+		psngrCount: 0,
+		timeStart: ""
+	})
+
+	const timeEnd = $derived.by(() => {
+		if (!form.timeStart) return "";
+		const date = new Date(form.timeStart);
+		date.setHours(date.getHours() + 1);
+		return date.toTimeString().slice(0, 5); // Returns "HH:mm"
+	})
 </script>
 
 <Header />
@@ -44,9 +55,9 @@
 		<div class="flex flex-row ">
 		<span class="label"><b>Station</b></span>
 			<div class="flex flex-wrap w-[620px] gap-auto">
-				<SearchFilter fieldname="From" menuItems={stationsMenu} bind:value={stationFrom}/>
+				<SearchFilter fieldname="From" menuItems={stationsMenu} bind:value={form.stationFrom}/>
 				<span class="flex-1 min-w-0"><i class="bi bi-arrow-right"></i></span>
-				<SearchFilter fieldname="To" menuItems={stationsMenu} bind:value={stationTo}/>
+				<SearchFilter fieldname="To" menuItems={stationsMenu} bind:value={form.stationTo}/>
 			</div>
 		</div>
 
@@ -55,13 +66,14 @@
 		<div class="flex flex-row ">
 			<span class="label"><b>Schedule Filter</b></span>
 
-			<div class="flex flex-wrap w-[620px] gap-2">
-				<select class="flex-1 min-w-0 !py-0">
+			<div class="flex flex-wrap w-[620px]">
+				<select class="flex-1 min-w-0 !py-0 mr-2">
 					<option>Departs at</option>
 					<option>Arrives at</option>
 				</select>
-				<input class="flex-1.5 min-w-0" type="datetime-local">
-				<input class="flex-1 min-w-0" type="time">
+				<input class="flex-1.5 min-w-0" type="datetime-local" bind:value={form.timeStart}>
+				<i class="bi bi-arrow-right"></i>
+				<input class="flex-1 min-w-0" type="time" value={timeEnd} disabled>
 			</div>
 		</div>
 
@@ -71,7 +83,7 @@
 			<span class="label"><b>Passenger Count</b></span>
 
 			<div class="flex flex-row w-[620px] gap-2">
-				<input type="number" min="1" max="6" bind:value={psngrCount}>
+				<input type="number" min="1" max="6" bind:value={form.psngrCount}>
 			</div>
 		</div>
 
@@ -88,7 +100,7 @@
 		</section>
 
 		{#each trains as train}
-			<Row {train} urlInfo={{train: train.id, psngrCount: psngrCount, from: stationFrom, to: stationTo}} />
+			<Row {train} urlInfo={{train: train.id, psngrCount: form.psngrCount, from: form.stationFrom, to: form.stationTo}} />
 		{/each}
 
 

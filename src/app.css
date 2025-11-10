@@ -52,6 +52,7 @@ input:disabled:hover, select:disabled:hover {
     padding: 0.25rem;
     height: 1.4rem;
     color: var(--color-outline) !important;
+    background-color: #f2f2f2;
     cursor: not-allowed;
 }
 .label {
