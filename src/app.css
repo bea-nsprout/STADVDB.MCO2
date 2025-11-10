@@ -33,7 +33,7 @@ article.train-map-right {
     position: absolute;
 }
 
-/* Dropdown Button */
+/* inputs */
 input, select {
     border: var(--color-outline) solid 1px;
     font-size: 0.9rem;
@@ -42,6 +42,17 @@ input, select {
     cursor: pointer;
     height: 1.4rem;
     color: var(--color-outline);
+    background-color: transparent;
+}
+input:disabled, select:disabled,
+input:disabled:hover, select:disabled:hover {
+    border: var(--color-outline) solid 1px;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    height: 1.4rem;
+    color: var(--color-outline) !important;
+    cursor: not-allowed;
 }
 .label {
     width: 8rem;
