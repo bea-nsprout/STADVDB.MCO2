@@ -7,7 +7,7 @@
 <div> <!--Container Div-->
    <Header/>
    <div class = "flex flex-row gap-x-30">
-   <TrainMap/>
+        <TrainMap/>
         <div class = "mt-20 flex flex-col gap-y-5"> <!--Label and Search Bar-->
             <div class = "text-3xl font-bold text-[var(--color-accent)]">
                 Search Name
@@ -17,6 +17,5 @@
             </div>
 
         </div>
-
     </div>
 </div>

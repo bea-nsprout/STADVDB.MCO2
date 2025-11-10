@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { derived } from "svelte/store";
+	import { goto } from "$app/navigation";
 
      let input = $state("");
      let testData = ['Blix', 'Bea', 'JP', 'Jericho', 'Ross']
@@ -32,7 +32,7 @@
     {#if filteredData.length > 0 && input !== ""}
     <div class = "searchResults">
         {#each filteredData as result}
-            <div class = "indivResult">
+            <div class = "indivResult" on:click = {()=> goto('/cancelBooking/userBookings')}>
                 {result}
             </div>
         {/each}
