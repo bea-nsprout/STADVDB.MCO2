@@ -46,20 +46,31 @@
 	}
 
 	let classColor = "black";
+	let seatingConfig = { cols: 8, topRows: 1, bottomRows: 1 }; // Default
+
 	if (classType === "First") {
 		classColor = "var(--color-accent)";
+		seatingConfig = { cols: 8, topRows: 1, bottomRows: 1 }; // A, AISLE, B
 	} else if (classType === "Business") {
 		classColor = "#929292";
+		seatingConfig = { cols: 16, topRows: 2, bottomRows: 2 }; // A, B, AISLE, C, D
+	} else {
+		seatingConfig = { cols: 16, topRows: 3, bottomRows: 2 }; // A, B, C, AISLE, D, E (Economy)
 	}
 </script>
 
 
 <!-- previous and next buttons -->
-<section class="p-[2rem] flex flex-row justify-between">
-	<button class="navigation flex-1 bg-black h-[4.5rem] w-[3.5rem] rounded-md" aria-label="previous car"
-					disabled={arrowsDisabled[0]}
-					onclick={() => {carCurrent--; console.log(carCurrent)}}>
-		<i class="bi bi-chevron-left text-[3rem]" style="color: var(--color-primary)"></i></button>
+<section class="py-[2rem] px-[10rem] flex flex-row justify-between">
+	<div class="flex-1 flex flex-col">
+		<button class="navigation  bg-black h-[4.5rem] w-[3.5rem] rounded-md" aria-label="previous car"
+						disabled={arrowsDisabled[0]}
+						onclick={() => {carCurrent--; console.log(carCurrent)}}>
+			<i class="bi bi-chevron-left text-[3rem]" style="color: var(--color-primary)"></i></button>
+		{#if carCurrent-1 !== 0}
+			Car # {carCurrent-1}
+		{/if}
+	</div>
 
 	<section class="car-info w-full flex flex-col gap-[0.5rem] justify-center">
 		<div class="flex flex-row justify-center">
@@ -78,10 +89,16 @@
 		</div>
 	</section>
 
-	<button class="navigation flex-1 bg-black h-[4.5rem] w-[3.5rem] rounded-md" aria-label="previous car"
-					disabled={arrowsDisabled[1]}
-					onclick={() => {carCurrent++; console.log(carCurrent)}}>
-		<i class="bi bi-chevron-right text-[3rem]" style="color: var(--color-primary)"></i></button>
+	<div class="flex-1">
+		<button class="navigation bg-black h-[4.5rem] w-[3.5rem] rounded-md" aria-label="previous car"
+						disabled={arrowsDisabled[1]}
+						onclick={() => {carCurrent++; console.log(carCurrent)}}>
+			<i class="bi bi-chevron-right text-[3rem]" style="color: var(--color-primary)"></i></button>
+		{#if carCurrent !== carsTotal}
+			Car # {carCurrent+1}
+		{/if}
+	</div>
+
 </section>
 
 <!-- Legend -->
@@ -104,43 +121,48 @@
 
 <!-- Seating Arrangement -->
 <section class="flex justify-center">
-	<section class="white !p-[3rem] seating-container flex flex-col gap-6">
-		<!-- Row A: 8 seats -->
-		<div class="seat-row flex gap-3">
-			{#each Array(8) as _, i}
-				{@const seatId = `A${i + 1}`}
-				<button
-					class="seat"
-					class:selected={isSeatSelected(seatId)}
-					class:available={!isSeatSelected(seatId) && !isSeatUnavailable(seatId)}
-					disabled={isSeatUnavailable(seatId)}
-					onclick={() => toggleSeat(seatId)}
-					aria-label="Seat {seatId}">
-					{seatId}
-				</button>
-			{/each}
-		</div>
+	<section class="white !p-[3rem] seating-container flex flex-col gap-3">
+		<!-- All classes: horizontal landscape layout -->
+		<!-- Top rows (letters going vertically, columns going horizontally) -->
+		{#each Array(seatingConfig.topRows) as _, rowIndex}
+			<div class="seat-row flex gap-2">
+				{#each Array(seatingConfig.cols) as _, colIndex}
+					{@const seatId = `${String.fromCharCode(65 + rowIndex)}${colIndex + 1}`}
+					<button
+						class="seat"
+						class:selected={isSeatSelected(seatId)}
+						class:available={!isSeatSelected(seatId) && !isSeatUnavailable(seatId)}
+						disabled={isSeatUnavailable(seatId)}
+						onclick={() => toggleSeat(seatId)}
+						aria-label="Seat {seatId}">
+						{seatId}
+					</button>
+				{/each}
+			</div>
+		{/each}
 
 		<!-- Aisle -->
 		<div class="aisle h-8 flex items-center justify-center text-gray-400">
 			<span>AISLE</span>
 		</div>
 
-		<!-- Row B: 8 seats -->
-		<div class="seat-row flex gap-3">
-			{#each Array(8) as _, i}
-				{@const seatId = `B${i + 1}`}
-				<button
-					class="seat"
-					class:selected={isSeatSelected(seatId)}
-					class:available={!isSeatSelected(seatId) && !isSeatUnavailable(seatId)}
-					disabled={isSeatUnavailable(seatId)}
-					onclick={() => toggleSeat(seatId)}
-					aria-label="Seat {seatId}">
-					{seatId}
-				</button>
-			{/each}
-		</div>
+		<!-- Bottom rows (continuing letters) -->
+		{#each Array(seatingConfig.bottomRows) as _, rowIndex}
+			<div class="seat-row flex gap-2">
+				{#each Array(seatingConfig.cols) as _, colIndex}
+					{@const seatId = `${String.fromCharCode(65 + seatingConfig.topRows + rowIndex)}${colIndex + 1}`}
+					<button
+						class="seat"
+						class:selected={isSeatSelected(seatId)}
+						class:available={!isSeatSelected(seatId) && !isSeatUnavailable(seatId)}
+						disabled={isSeatUnavailable(seatId)}
+						onclick={() => toggleSeat(seatId)}
+						aria-label="Seat {seatId}">
+						{seatId}
+					</button>
+				{/each}
+			</div>
+		{/each}
 	</section>
 </section>
 
@@ -166,7 +188,7 @@
 
 <section class="footer fixed bottom-0 left-0 right-0 flex flex-row justify-between px-8 py-2 50">
 	<a href="/" class="px-6 py-3  text-black  font-semibold hover:underline transition">
-		<i class="bi bi-caret-left-fill !mr-[1rem] !text-black"></i> Back</a>
+		<i class="bi bi-caret-left-fill !mr-[1rem] !text-black"></i> Back to Train Schedules</a>
 	<a href="/book/step3-confirmation" class="px-6 py-3  text-[var(--color-accent)]  font-semibold hover:underline transition">
 		Proceed to Confirmation <i class="bi bi-caret-right-fill !ml-[1rem] !text-[var(--color-accent)]"></i> </a>
 </section>
