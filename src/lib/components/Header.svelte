@@ -1,7 +1,7 @@
 <ul class="header flex flex-row gap-40 text-[1.5rem] justify-center py-[0.3rem]">
-	<li>BOOK</li>
-	<li>CANCEL</li>
-	<li>INFO</li>
+	<li><a href="/">BOOK</a></li>
+	<li><a href="/cancelBooking">CANCEL</a></li>
+	<li><a href="/info">INFO</a></li>
 </ul>
 
 <style>
