@@ -1,19 +1,43 @@
 <script lang="ts">
+	import type { derived } from "svelte/store";
 
+     let input = $state("");
+     let testData = ['Blix', 'Bea', 'JP', 'Jericho', 'Ross']
+
+     let filteredData = $derived.by(()=> {
+        let lowercaseInput: string = input.toLowerCase();
+        let lowercaseTest:string[] = []
+        testData.forEach((item)=>{
+            item = item.toLowerCase()
+            lowercaseTest.push(item)
+        })
+
+        let newArray: string[] = []
+
+        for(let i = 0; i < lowercaseTest.length;i++){
+            if(lowercaseTest[i].includes(lowercaseInput)){
+                newArray.push(testData[i])
+            }
+        }
+        return newArray
+     })
+
+    
 </script>
 
 <div class = "flex flex-col">
     <div>
-        <input type = "search" class = "inputField" placeholder = "Enter Name...">
+        <input type = "search" class = "inputField" bind:value = {input} placeholder = "Enter Name...">
     </div>
-    <!-- <div class = "searchResults">
-        <div>
-            Name
-        </div>
-        <div>
-            Name2
-        </div>
-    </div> -->
+    {#if filteredData.length > 0 && input !== ""}
+    <div class = "searchResults">
+        {#each filteredData as result}
+            <div class = "indivResult">
+                {result}
+            </div>
+        {/each}
+    </div>
+    {/if}
 </div>
 
 <style>
@@ -36,5 +60,15 @@
     background-color: #D9D9D9;
     width: 200%;
     padding:5px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.searchResults{
+    font-size: 30px;
+}
+
+.searchResults>:hover{
+    background-color: #C5C2C2;
+    color: var(--color-accent);
 }
 </style>
