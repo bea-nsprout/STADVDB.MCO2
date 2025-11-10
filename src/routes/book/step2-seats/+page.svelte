@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import SearchFilter from '$lib/components/SearchFilter.svelte';
+	import { bookingStore } from '$lib/stores/booking';
 
 	const train = $derived(page.url.searchParams.get('train'));
 	const classType = $derived(page.url.searchParams.get('class'));
@@ -57,6 +59,21 @@
 	} else {
 		seatingConfig = { cols: 16, topRows: 3, bottomRows: 2 }; // A, B, C, AISLE, D, E (Economy)
 	}
+
+	function proceedToConfirmation() {
+		// Save booking data to store
+		bookingStore.set({
+			train: train || '',
+			classType: classType || '',
+			stationFrom: stationFrom || '',
+			stationTo: stationTo || '',
+			passengers: Number(seats) || 0,
+			selectedSeats: selectedSeats
+		});
+
+		// Navigate to confirmation page
+		goto('/book/step3-confirmation');
+	}
 </script>
 
 
@@ -102,7 +119,7 @@
 </section>
 
 <!-- Legend -->
-<section class="flex justify-center mb-[2rem]">
+<section class="flex justify-center mb-[0.5rem]">
 	<div class="flex gap-6 items-center">
 		<div class="flex items-center gap-2">
 			<div class="w-4 h-4 rounded border-2 border-gray-300" style="background-color: #e5e7eb;"></div>
@@ -167,7 +184,7 @@
 </section>
 
 <!-- Selected Seats Display -->
-<section class="p-[2rem] mx-[5rem] flex justify-center">
+<section class="p-[2rem] mx-[5rem] flex justify-center !mb-12">
 	<div>
 		<h3 class="font-bold mb-2">Selected Seats:
 			<span class="text-[var(--color-accent)]">({selectedSeats.length} out of {seats})</span>
@@ -186,11 +203,11 @@
 	</div>
 </section>
 
-<section class="footer fixed bottom-0 left-0 right-0 flex flex-row justify-between px-8 py-2 50">
+<section class="footer fixed bottom-0 left-0 right-0 flex flex-row justify-between px-8 py-2 50 !bg-[var(--color-bg)]/80">
 	<a href="/" class="px-6 py-3  text-black  font-semibold hover:underline transition">
 		<i class="bi bi-caret-left-fill !mr-[1rem] !text-black"></i> Back to Train Schedules</a>
-	<a href="/book/step3-confirmation" class="px-6 py-3  text-[var(--color-accent)]  font-semibold hover:underline transition">
-		Proceed to Confirmation <i class="bi bi-caret-right-fill !ml-[1rem] !text-[var(--color-accent)]"></i> </a>
+	<button onclick={proceedToConfirmation} class="px-6 py-3  text-[var(--color-accent)]  font-semibold hover:underline transition bg-transparent border-0 cursor-pointer">
+		Proceed to Confirmation <i class="bi bi-caret-right-fill !ml-[1rem] !text-[var(--color-accent)]"></i></button>
 </section>
 
 <style>
