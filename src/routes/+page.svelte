@@ -3,8 +3,9 @@
 	import Header from '$lib/components/Header.svelte';
 	import SearchFilter from '$lib/components/SearchFilter.svelte';
 	import Row from '$lib/components/book-train/Row.svelte';
+	import { getStations, getStationIndex } from '$lib/data/stations';
 
-	let stationsMenu = ["Tokyo", "Shin-Yokohoma", "Toyohashi", "Nagoya", "Kyoto", "Shin-Osaka"]
+	let stationsMenu = getStations()
 
 	let trains =
 	[
@@ -38,6 +39,9 @@
 		timeStart: ""
 	})
 
+	let stationFromIndex = $derived(getStationIndex(form.stationFrom))
+	let stationToIndex = $derived(getStationIndex(form.stationTo))
+
 	const timeEnd = $derived.by(() => {
 		if (!form.timeStart) return "";
 		const date = new Date(form.timeStart);
@@ -47,7 +51,7 @@
 </script>
 
 <Header />
-<TrainMap />
+<TrainMap stationFrom={stationFromIndex} stationTo={stationToIndex} />
 
 <article class="train-map-right">
 	<section class="white flex flex-col gap-[1rem]">
