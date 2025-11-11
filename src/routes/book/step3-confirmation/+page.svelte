@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import TrainMapHorizontal from '$lib/components/TrainMapHorizontal.svelte';
+	import ReceiptTemplate from '$lib/components/book-train/ReceiptTemplate.svelte';
 	import { getStations, getStationIndex } from '$lib/data/stations';
 	import { getFare } from '$lib/data/farematrix.ts';
 
@@ -22,6 +23,11 @@
 	let stationToIndex = $derived(getStationIndex(booking.stationTo))
 	let price = getFare(stationFromIndex, stationToIndex, getStationIndex(booking.classType));
 	let priceTotal = price * booking.selectedSeats.length;
+
+	// Construct URL for back navigation with all booking data
+	const backToSeatsUrl = $derived(
+		`/book/step2-seats?train=${booking.train}&class=${booking.classType}&seats=${booking.passengers}&from=${booking.stationFrom}&to=${booking.stationTo}`
+	);
 </script>
 
 {#if form?.success}
@@ -30,10 +36,20 @@
 		<div class="flex flex-col items-center gap-4">
 			<i class="bi bi-check-circle text-6xl text-green-600"></i>
 			<h1 class="text-3xl font-bold text-green-600">Booking Confirmed!</h1>
-			<a href="/" class="mt-4 px-6 py-3 bg-[var(--color-accent)] text-white rounded-md font-semibold hover:opacity-90 transition">
-				Back to Home
-			</a>
 		</div>
+	</section>
+
+	<!-- Receipts - One per seat -->
+	<section class="w-[85%] mx-auto mb-[2rem] flex flex-col gap-4">
+		{#each booking.selectedSeats as seat}
+			<ReceiptTemplate booking={{...booking, selectedSeats: [seat]}} />
+		{/each}
+	</section>
+
+	<section class="w-[85%] mx-auto mb-[4rem] flex justify-center">
+		<a href="/" class="px-6 py-3 bg-[var(--color-accent)] text-white rounded-md font-semibold hover:opacity-90 transition">
+			Back to Home
+		</a>
 	</section>
 {:else}
 	<!-- Booking Form -->
@@ -85,6 +101,20 @@
 					<div class="flex flex-row ">
 						<span class="label"><b>Class</b></span>
 						<input value={booking.classType} disabled />
+					</div>
+
+					<div class="flex flex-row ">
+						<span class="label"><b>Date</b></span>
+						<input value={booking.date} disabled />
+					</div>
+
+					<div class="flex flex-row ">
+						<span class="label"><b>Schedule</b></span>
+						<div class="flex flex-wrap">
+							<input value={booking.timeDepart} disabled style="width: 8rem"/>
+							<span class="flex-1 min-w-0"><i class="bi bi-arrow-right"></i></span>
+							<input value={booking.timeArrive} disabled style="width: 8rem"/>
+						</div>
 					</div>
 
 					<div class="flex flex-row ">
@@ -143,11 +173,10 @@
 			</section>
 		</form>
 	</article>
+
+	<section class="footer fixed bottom-0 left-0 right-0 flex flex-row justify-between px-8 py-2 50 !bg-[var(--color-bg)]/80">
+		<a href={backToSeatsUrl} class="px-6 py-3 text-black font-semibold hover:underline transition">
+			<i class="bi bi-caret-left-fill !mr-[1rem] !text-black"></i> Back to Seat Selection
+		</a>
+	</section>
 {/if}
-
-
-<section class="footer fixed bottom-0 left-0 right-0 flex flex-row justify-between px-8 py-2 50 !bg-[var(--color-bg)]/80">
-	<a href="/book/step2-seats" class="px-6 py-3 text-black font-semibold hover:underline transition">
-		<i class="bi bi-caret-left-fill !mr-[1rem] !text-black"></i> Back to Seat Selection
-	</a>
-</section>

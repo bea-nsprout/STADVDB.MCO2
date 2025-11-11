@@ -1,18 +1,20 @@
 // Base fare matrix: fareMatrix[from][to]
+import { getClassIndex } from '$lib/data/classTypes.ts';
+
 const baseFareMatrix = [
-	[0,    1000, 3000, 3500, 5000, 5500], // Tokyo
-	[1000, 0,    2500, 3000, 4500, 5000], // Shin-Yokohoma
-	[3000, 2500, 0,    1000, 2500, 3000], // Toyohashi
-	[3500, 3000, 1000, 0,    2000, 2500], // Nagoya
-	[5000, 4500, 2500, 2000, 0,    1000], // Kyoto
-	[5500, 5000, 3000, 2500, 1000, 0   ]  // Shin-Osaka
+	[0,    2500, 4500, 5000, 6500, 7000], // Tokyo
+	[2500, 0,    4000, 4500, 6000, 6500], // Shin-Yokohoma
+	[4500, 4000, 0,    2500, 4000, 4500], // Toyohashi
+	[5000, 4500, 2500, 0,    3500, 4000], // Nagoya
+	[6500, 6000, 4000, 3500, 0,    2500], // Kyoto
+	[7000, 6500, 4500, 4000, 2500, 0   ]  // Shin-Osaka
 ];
-const classMultipliers = [2.0, 1.5, 1.0]; // Economy, Business, First
+const classMultipliers = [1.5, 2.0, 3.0]; // Economy, Business, First Class (respectively)
 
 // Fare lookup function
-export function getFare(fromIndex, toIndex, classIndex) {
+export function getFare(fromIndex:number, toIndex:number, classType: string) {
 	const baseFare = baseFareMatrix[fromIndex]?.[toIndex];
-	const multiplier = classMultipliers[classIndex];
+	const multiplier = classMultipliers[getClassIndex(classType)];	//gets the index from classTypes.ts
 	if (baseFare == null || multiplier == null) return null;
 	return Math.round(baseFare * multiplier);
 }

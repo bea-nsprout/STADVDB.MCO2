@@ -7,6 +7,11 @@ export interface BookingData {
 	stationTo: string;
 	passengers: number;
 	selectedSeats: Array<{ car: number; seat: string }>;
+	timeStart: string;
+	filterType: string;
+	date: string;
+	timeDepart: string;
+	timeArrive: string;
 }
 
 const defaultBooking: BookingData = {
@@ -14,8 +19,13 @@ const defaultBooking: BookingData = {
 	classType: '',
 	stationFrom: '',
 	stationTo: '',
-	passengers: 0,
-	selectedSeats: []
+	passengers: 1,
+	selectedSeats: [],
+	timeStart: '',
+	filterType: 'Departs at',
+	date: '',
+	timeDepart: '',
+	timeArrive: ''
 };
 
 export const bookingStore = writable<BookingData>(defaultBooking);

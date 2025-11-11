@@ -16,7 +16,15 @@
 	const arrowsDisabled = $derived([carCurrent === 1, carCurrent === carsTotal]);
 
 	// Selected seats: array of {car: number, seat: string}
-	let selectedSeats = $state([]);
+	// Initialize from store if coming back from confirmation page
+	let selectedSeats = $state(
+		$bookingStore.train === train &&
+		$bookingStore.classType === classType &&
+		$bookingStore.stationFrom === stationFrom &&
+		$bookingStore.stationTo === stationTo
+			? [...$bookingStore.selectedSeats] // Restore from store
+			: [] // Start fresh
+	);
 
 	// Unavailable seats (already booked)
 	let unavailableSeats = $state([
@@ -61,15 +69,16 @@
 	}
 
 	function proceedToConfirmation() {
-		// Save booking data to store
-		bookingStore.set({
+		// Save booking data to store (update to preserve existing fields like date, times)
+		bookingStore.update(store => ({
+			...store,
 			train: train || '',
 			classType: classType || '',
 			stationFrom: stationFrom || '',
 			stationTo: stationTo || '',
 			passengers: Number(seats) || 0,
 			selectedSeats: selectedSeats
-		});
+		}));
 
 		// Navigate to confirmation page
 		goto('/book/step3-confirmation');
