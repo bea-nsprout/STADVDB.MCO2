@@ -183,9 +183,9 @@
 				disabled={!isFormValid || isSearching}
 			>
 				{#if isSearching}
-					<i class="bi bi-hourglass-split"></i> Searching...
+					<i class="bi bi-hourglass-split !text-white"></i> Searching...
 				{:else}
-					<i class="bi bi-search"></i> Search Trains
+					<i class="bi bi-search !text-white"></i> Search Trains
 				{/if}
 			</button>
 		</div>
