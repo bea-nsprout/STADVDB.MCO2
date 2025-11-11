@@ -4,6 +4,7 @@
 	import type { ActionData } from './$types';
 	import TrainMapHorizontal from '$lib/components/TrainMapHorizontal.svelte';
 	import { getStations, getStationIndex } from '$lib/data/stations';
+	import { getFare } from '$lib/data/farematrix.ts';
 
 
 
@@ -17,10 +18,10 @@
 	// Form fields
 	let email = $state('');
 
-	let price = 1000;
-	let priceTotal = price * booking.selectedSeats.length;
 	let stationFromIndex = $derived(getStationIndex(booking.stationFrom))
 	let stationToIndex = $derived(getStationIndex(booking.stationTo))
+	let price = getFare(stationFromIndex, stationToIndex, getStationIndex(booking.classType));
+	let priceTotal = price * booking.selectedSeats.length;
 </script>
 
 {#if form?.success}
