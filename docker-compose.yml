@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # Primary Database - OLTP (Transactional Operations)
+  db-primary:
+    image: postgres:16-alpine
+    container_name: train-db-primary
+    environment:
+      POSTGRES_USER: trainadmin
+      POSTGRES_PASSWORD: trainpass123
+      POSTGRES_DB: train_booking
+      POSTGRES_INITDB_ARGS: "-c wal_level=logical -c max_wal_senders=10 -c max_replication_slots=10"
+    volumes:
+      - ./docker/postgres/primary/init:/docker-entrypoint-initdb.d
+      - ./docker/postgres/primary/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - primary-data:/var/lib/postgresql/data
+      - primary-wal:/var/lib/postgresql/wal_archive
+    ports:
+      - "5432:5432"
+    networks:
+      - train-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c archive_mode=on
+      -c archive_command='test ! -f /var/lib/postgresql/wal_archive/%f && cp %p /var/lib/postgresql/wal_archive/%f'
+      -c archive_timeout=3600
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trainadmin -d train_booking"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Hot Backup - Physical Replication
+  db-replica:
+    image: postgres:16-alpine
+    container_name: train-db-replica
+    environment:
+      POSTGRES_USER: trainadmin
+      POSTGRES_PASSWORD: trainpass123
+      PGUSER: trainadmin
+    volumes:
+      - ./docker/postgres/replica/init:/docker-entrypoint-initdb.d
+      - replica-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - train-network
+    depends_on:
+      db-primary:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 192M
+    command: >
+      bash -c "
+      if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+        echo 'Setting up replica from primary...';
+        until PGPASSWORD=trainpass123 pg_basebackup -h db-primary -D /var/lib/postgresql/data -U trainadmin -v -P -W -R;
+        do
+          echo 'Waiting for primary to be ready...';
+          sleep 5;
+        done;
+        echo 'standby_mode = on' > /var/lib/postgresql/data/standby.signal;
+      fi;
+      exec postgres
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trainadmin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Reports & Visualizations Database - OLAP (Analytical Operations)
+  db-reports:
+    image: postgres:16-alpine
+    container_name: train-db-reports
+    environment:
+      POSTGRES_USER: trainadmin
+      POSTGRES_PASSWORD: trainpass123
+      POSTGRES_DB: train_reports
+    volumes:
+      - ./docker/postgres/reports/init:/docker-entrypoint-initdb.d
+      - reports-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - train-network
+    depends_on:
+      db-primary:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 192M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trainadmin -d train_reports"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Web Application (SvelteKit)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: train-web-app
+    environment:
+      DATABASE_URL: postgresql://trainadmin:trainpass123@db-primary:5432/train_booking
+      REPORTS_DATABASE_URL: postgresql://trainadmin:trainpass123@db-reports:5432/train_reports
+      NODE_ENV: production
+      PORT: 5173
+      NODE_OPTIONS: "--max-old-space-size=256"
+    ports:
+      - "5173:5173"
+    networks:
+      - train-network
+    depends_on:
+      db-primary:
+        condition: service_healthy
+      db-reports:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 192M
+    restart: unless-stopped
+
+  # Load Testing with JMeter (Optional - comment out if not needed)
+  jmeter:
+    image: justb4/jmeter:latest
+    container_name: train-jmeter
+    volumes:
+      - ./docker/jmeter/tests:/tests
+      - ./docker/jmeter/results:/results
+    networks:
+      - train-network
+    depends_on:
+      - web
+    profiles:
+      - testing
+    entrypoint: ["tail", "-f", "/dev/null"]  # Keep container running
+
+volumes:
+  primary-data:
+    driver: local
+  primary-wal:
+    driver: local
+  replica-data:
+    driver: local
+  reports-data:
+    driver: local
+
+networks:
+  train-network:
+    driver: bridge

@@ -1,0 +1,58 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build output
+.svelte-kit
+build
+dist
+.output
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# Docker files
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+
+# Documentation
+*.md
+!README.md
+
+# Project specifications
+claudecontextfiles
+"project specifications.pdf"
+
+# Database volumes
+docker/postgres/*/data
+primary-data
+replica-data
+reports-data
+
+# Logs
+logs
+*.log
