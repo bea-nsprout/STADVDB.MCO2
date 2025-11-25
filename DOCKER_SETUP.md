@@ -31,10 +31,13 @@ docker-compose up -d
 docker-compose ps
 ```
 
-### 4. Setup Database Replication
+### 4. Sync Data to Reports Database
 ```powershell
-# Wait about 30 seconds for databases to initialize, then run:
-docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "SELECT reports.setup_subscription_from_primary();"
+# Install dependencies first
+npm install
+
+# Run ETL to sync OLTP → OLAP data
+npm run etl
 ```
 
 ### 5. Access the Application
@@ -60,9 +63,11 @@ The system consists of 4 main containers:
 
 1. **db-primary** (Port 5432) - Primary PostgreSQL database for OLTP operations
 2. **db-replica** (Port 5433) - Hot backup using physical replication
-3. **db-reports** (Port 5434) - Reports database for OLAP operations using logical replication
+3. **db-reports** (Port 5434) - Reports database for OLAP operations (synced via ETL)
 4. **web** (Port 5173) - SvelteKit web application
 5. **k6** (Optional) - Load testing tool
+
+**Note:** Reports DB uses ETL for data sync (not logical replication) due to different schemas.
 
 ## Prerequisites
 
@@ -123,37 +128,36 @@ docker-compose logs -f
 
 **Note for Windows:** These commands work the same in PowerShell, Command Prompt, or WSL terminal.
 
-### 3. Setup Logical Replication (After First Launch)
+### 3. Sync Data to Reports Database (OLTP → OLAP)
 
-After all databases are up and running, setup the logical replication:
+**⚠️ Important:** Logical replication doesn't work because Primary and Reports have different schemas. Use the ETL script instead.
 
-**Automated Setup (All Platforms):**
+**Sync Data (All Platforms):**
 ```bash
-# This command works on Linux/Mac/Windows (PowerShell, CMD, or WSL)
-docker exec -it train-db-reports sh -c "apk add --no-cache postgresql-client bash && bash /docker-entrypoint-initdb.d/setup-replication.sh"
+# Install dependencies (first time only)
+npm install
+
+# Run ETL to transform and load data
+npm run etl
 ```
 
-**Manual Setup (Alternative - All Platforms):**
-```bash
-# If automated setup fails, use this manual approach
-docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "SELECT reports.setup_subscription_from_primary();"
-```
+This will:
+- Extract data from Primary DB (OLTP)
+- Transform to star schema
+- Load into Reports DB (OLAP)
+- Refresh materialized views
 
-**Windows Notes:**
-- Both methods work in PowerShell, Command Prompt, or WSL terminal
-- If you encounter issues, ensure Docker Desktop is running and containers are healthy
-
-### 4. Verify Replication
+### 4. Verify Data Sync
 
 ```bash
-# Check replication status on primary
-docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "SELECT * FROM pg_replication_slots;"
+# Check data in reports database
+docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "SELECT COUNT(*) FROM reports.tickets;"
 
-# Check subscription on reports database
-docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "SELECT * FROM pg_subscription;"
-
-# Check replica status
+# Check replica status (physical replication)
 docker exec -it train-db-replica psql -U trainadmin -c "SELECT * FROM pg_stat_replication;"
+
+# View reports
+docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "SELECT * FROM reports.popular_routes LIMIT 10;"
 ```
 
 ## Accessing Services
@@ -426,9 +430,18 @@ export default function () {
 }
 ```
 
-## Refresh Materialized Views
+## Data Sync & Materialized Views
 
-The reports database has materialized views that need periodic refreshing:
+### Sync Data from Primary to Reports
+
+```bash
+# Run ETL to sync latest data
+npm run etl
+```
+
+### Refresh Materialized Views Only
+
+The ETL script automatically refreshes views, but you can also refresh manually:
 
 ```bash
 # Refresh all materialized views
@@ -481,15 +494,15 @@ docker volume rm mco2_trains_replica-data
 docker-compose up -d
 ```
 
-### Logical Replication Issues
+### Reports Database Out of Sync
 
 ```bash
-# Drop and recreate subscription
-docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "DROP SUBSCRIPTION IF EXISTS reports_sub;"
-docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "SELECT reports.setup_subscription_from_primary();"
+# Re-run ETL to sync latest data
+npm run etl
 
-# Check for replication lag
-docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "SELECT * FROM pg_stat_replication;"
+# Or clear reports data and reload everything
+docker exec train-db-reports psql -U trainadmin -d train_reports -c "TRUNCATE reports.tickets CASCADE;"
+npm run etl
 ```
 
 ### View Container Logs
