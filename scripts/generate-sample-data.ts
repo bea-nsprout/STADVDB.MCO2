@@ -383,18 +383,29 @@ async function insertBookingsAndTickets(
         const actualCarId = seatCarResult.rows[0]?.car;
         const seatClass = carClassMap.get(actualCarId) || 'Economy';
 
-        // Get random origin and destination
-        const stationIndices = [0, 1, 2, 3, 4, 5];
-        const originIdx = Math.floor(Math.random() * stationIndices.length);
-        let destIdx = Math.floor(Math.random() * stationIndices.length);
-        while (destIdx === originIdx) {
-          destIdx = Math.floor(Math.random() * stationIndices.length);
-        }
+        // Get random origin and destination respecting route direction
+        let originIdx, destIdx;
 
-        // Ensure correct direction
-        if (journey.route === 2 && originIdx > destIdx) {
-          // Westbound should go from higher to lower index
-          [stationIndices[originIdx], stationIndices[destIdx]] = [stationIndices[destIdx], stationIndices[originIdx]];
+        if (journey.route === 1) {
+          // Eastbound: Shin-Osaka (5) → Tokyo (0)
+          // Origin should have higher index than destination
+          originIdx = Math.floor(Math.random() * 6); // 0-5
+          destIdx = Math.floor(Math.random() * originIdx); // Always less than origin
+          if (destIdx === originIdx || originIdx === 0) {
+            // Ensure valid pair
+            originIdx = 5; // Shin-Osaka
+            destIdx = Math.floor(Math.random() * 5); // Any station before it
+          }
+        } else {
+          // Westbound: Tokyo (0) → Shin-Osaka (5)
+          // Origin should have lower index than destination
+          originIdx = Math.floor(Math.random() * 6); // 0-5
+          destIdx = originIdx + 1 + Math.floor(Math.random() * (5 - originIdx)); // Always greater than origin
+          if (destIdx === originIdx || originIdx === 5) {
+            // Ensure valid pair
+            originIdx = 0; // Tokyo
+            destIdx = 1 + Math.floor(Math.random() * 5); // Any station after it
+          }
         }
 
         const originStation = STATIONS[originIdx];
