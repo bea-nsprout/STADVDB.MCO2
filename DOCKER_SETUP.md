@@ -31,19 +31,25 @@ docker-compose up -d
 docker-compose ps
 ```
 
-### 4. Sync Data to Reports Database
+### 4. Generate Sample Data
 ```powershell
 # Install dependencies first
 npm install
 
+# Generate realistic sample data (45,000+ tickets)
+npm run generate-data
+```
+
+### 5. Sync Data to Reports Database
+```powershell
 # Run ETL to sync OLTP → OLAP data
 npm run etl
 ```
 
-### 5. Access the Application
+### 6. Access the Application
 - Open your browser and go to: **http://localhost:5173**
 
-### 6. (Optional) Setup Load Testing with k6
+### 7. (Optional) Setup Load Testing with k6
 ```powershell
 # Only if you want to run load tests:
 New-Item -ItemType Directory -Path docker\k6\scripts -Force
@@ -128,15 +134,31 @@ docker-compose logs -f
 
 **Note for Windows:** These commands work the same in PowerShell, Command Prompt, or WSL terminal.
 
-### 3. Sync Data to Reports Database (OLTP → OLAP)
+### 3. Generate Sample Data
+
+**Generate realistic sample data (All Platforms):**
+```bash
+# Install dependencies (first time only)
+npm install
+
+# Generate 45,000+ tickets across 11 days
+npm run generate-data
+```
+
+This creates:
+- 10 trains (320 seats each)
+- 220 journeys (20/day from Nov 25 - Dec 5)
+- 45,000+ bookings across all classes
+- Realistic pricing and occupancy
+
+**⚠️ Warning:** This clears ALL existing data!
+
+### 4. Sync Data to Reports Database (OLTP → OLAP)
 
 **⚠️ Important:** Logical replication doesn't work because Primary and Reports have different schemas. Use the ETL script instead.
 
 **Sync Data (All Platforms):**
 ```bash
-# Install dependencies (first time only)
-npm install
-
 # Run ETL to transform and load data
 npm run etl
 ```
@@ -147,7 +169,7 @@ This will:
 - Load into Reports DB (OLAP)
 - Refresh materialized views
 
-### 4. Verify Data Sync
+### 5. Verify Data Sync
 
 ```bash
 # Check data in reports database
@@ -430,9 +452,19 @@ export default function () {
 }
 ```
 
-## Data Sync & Materialized Views
+## Sample Data & ETL
 
-### Sync Data from Primary to Reports
+### Generate New Sample Data
+
+```bash
+# Generate realistic sample data (⚠️ clears existing data!)
+npm run generate-data
+
+# Then sync to reports database
+npm run etl
+```
+
+### Sync Data from Primary to Reports (Without Regenerating)
 
 ```bash
 # Run ETL to sync latest data
