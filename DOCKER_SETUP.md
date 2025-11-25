@@ -167,6 +167,7 @@ docker exec -it train-db-replica psql -U trainadmin -c "SELECT * FROM pg_stat_re
 
 ### Connect to Databases
 
+**All Platforms (Linux/Mac/Windows):**
 ```bash
 # Primary database
 docker exec -it train-db-primary psql -U trainadmin -d train_booking
@@ -177,6 +178,120 @@ docker exec -it train-db-replica psql -U trainadmin -d train_booking
 # Reports database
 docker exec -it train-db-reports psql -U trainadmin -d train_reports
 ```
+
+### Inspect Database Contents
+
+**List all tables:**
+```bash
+# On primary database
+docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "\dt"
+
+# On reports database
+docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "\dt"
+```
+
+**View table data:**
+```bash
+# View all records in a table (example: users table)
+docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "SELECT * FROM users LIMIT 10;"
+
+# Count records in a table
+docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "SELECT COUNT(*) FROM users;"
+
+# View table structure
+docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "\d users"
+```
+
+**Useful psql commands (when connected interactively):**
+```sql
+\dt              -- List all tables
+\dt+             -- List tables with size info
+\d table_name    -- Describe table structure
+\l               -- List all databases
+\dn              -- List all schemas
+\q               -- Quit psql
+```
+
+**Quick data inspection (one-liners):**
+```bash
+# List all tables with row counts (primary database)
+docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "
+SELECT schemaname, tablename,
+  (SELECT COUNT(*) FROM pg_catalog.quote_ident(schemaname)||'.'||pg_catalog.quote_ident(tablename)) as row_count
+FROM pg_tables
+WHERE schemaname = 'public';"
+
+# Show recent bookings
+docker exec -it train-db-primary psql -U trainadmin -d train_booking -c "SELECT * FROM bookings ORDER BY created_at DESC LIMIT 5;"
+```
+
+### Using pgAdmin (http://localhost:9000/browser/)
+
+**Step 1: Connect pgAdmin container to the database network**
+
+```bash
+# Find your pgAdmin container name
+docker ps | findstr pgadmin
+
+# First, find the actual network name (Docker Compose adds a project prefix)
+docker network ls
+
+# The network will be named something like: stadvdb_mco2_train-network
+# Connect pgAdmin to it (replace with your actual container name and network name)
+docker network connect <project_name>_train-network <your-pgadmin-container-name>
+
+# Example:
+docker network connect stadvdb_mco2_train-network sql-201-docker-pgadmin-1
+```
+
+**⚠️ Important: Network Naming**
+- Docker Compose automatically prefixes network names with your project/directory name
+- The network will be called `<project_name>_train-network` (NOT just `train-network`)
+- Run `docker network ls` to see the actual network name on your system
+- Example: `stadvdb_mco2_train-network`
+
+**Step 2: Access pgAdmin**
+- Open browser: http://localhost:9000/browser/
+- Login with your pgAdmin credentials
+
+**Step 3: Add Primary Database Server**
+- Right-click "Servers" in left panel → "Register" → "Server"
+- **General tab:**
+  - Name: `Train Booking - Primary`
+- **Connection tab:**
+  - Host: `train-db-primary` (use container name, NOT localhost)
+  - Port: `5432`
+  - Maintenance database: `train_booking`
+  - Username: `trainadmin`
+  - Password: `trainpass123`
+  - Save password: ✓ (check this box)
+- Click "Save"
+
+**Step 4: Add Reports Database Server**
+- Repeat the process with:
+  - Name: `Train Booking - Reports`
+  - Host: `train-db-reports`
+  - Port: `5432` (note: use 5432 here, not 5434)
+  - Maintenance database: `train_reports`
+  - Username: `trainadmin`
+  - Password: `trainpass123`
+
+**Step 5: Add Replica Database Server (Optional)**
+- Name: `Train Booking - Replica`
+- Host: `train-db-replica`
+- Port: `5432`
+- Maintenance database: `train_booking`
+- Username: `trainadmin`
+- Password: `trainpass123`
+
+**Important Notes:**
+- When pgAdmin runs in Docker, use **container names** as hosts (`train-db-primary`, `train-db-reports`, `train-db-replica`)
+- Always use port **5432** when connecting via Docker network
+- If container names don't work, try using `host.docker.internal` with ports 5432, 5433, and 5434 instead
+
+**Browsing the Data:**
+- Expand server → Databases → train_booking → Schemas → public → Tables
+- Right-click any table → "View/Edit Data" → "All Rows"
 
 ### Backup and Restore
 
