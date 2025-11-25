@@ -141,13 +141,13 @@ services:
           memory: 192M
     restart: unless-stopped
 
-  # Load Testing with JMeter (Optional - comment out if not needed)
-  jmeter:
-    image: justb4/jmeter:latest
-    container_name: train-jmeter
+  # Load Testing with k6 (Optional - comment out if not needed)
+  k6:
+    image: grafana/k6:latest
+    container_name: train-k6
     volumes:
-      - ./docker/jmeter/tests:/tests
-      - ./docker/jmeter/results:/results
+      - ./docker/k6/scripts:/scripts
+      - ./docker/k6/results:/results
     networks:
       - train-network
     depends_on:
