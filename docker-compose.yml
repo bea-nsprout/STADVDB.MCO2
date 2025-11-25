@@ -13,6 +13,7 @@ services:
     volumes:
       - ./docker/postgres/primary/init:/docker-entrypoint-initdb.d
       - ./docker/postgres/primary/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./docker/postgres/primary/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf
       - primary-data:/var/lib/postgresql/data
       - primary-wal:/var/lib/postgresql/wal_archive
     ports:
@@ -33,6 +34,7 @@ services:
       -c archive_mode=on
       -c archive_command='test ! -f /var/lib/postgresql/wal_archive/%f && cp %p /var/lib/postgresql/wal_archive/%f'
       -c archive_timeout=3600
+      -c hba_file=/etc/postgresql/pg_hba.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U trainadmin -d train_booking"]
       interval: 10s
@@ -72,9 +74,11 @@ services:
           echo 'Waiting for primary to be ready...';
           sleep 5;
         done;
+        chmod -R 0700 /var/lib/postgresql/data;
+        chown -R postgres:postgres /var/lib/postgresql/data;
         echo 'standby_mode = on' > /var/lib/postgresql/data/standby.signal;
       fi;
-      exec postgres
+      exec su-exec postgres postgres
       "
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U trainadmin"]
