@@ -16,7 +16,7 @@
 	let hasSearched = $state(false)
 
 	async function searchTrains() {
-		if (!form.stationFrom || !form.stationTo) {
+		if (!form.stationFrom || !form.stationTo || !form.classType) {
 			return; // Don't search if required fields are missing
 		}
 
@@ -61,6 +61,7 @@
 		stationTo: $bookingStore.stationTo || "",
 		psngrCount: $bookingStore.passengers || 1,
 		timeStart: $bookingStore.timeStart || defaultDateTime,
+		classType: $bookingStore.classType || "",
 		filterType: $bookingStore.filterType || "Departs at"
 	})
 
@@ -80,6 +81,7 @@
 			passengers: form.psngrCount,
 			timeStart: form.timeStart,
 			filterType: form.filterType,
+			classType: form.classType,
 			date: formattedDate
 		}));
 	});
@@ -98,14 +100,16 @@
 	const isFormValid = $derived(form.stationFrom !== "" && form.stationTo !== "" && form.psngrCount >= 1)
 	const shouldShowResults = $derived(form.stationFrom !== "" && form.stationTo !== "")
 
+	// TODO: replace this entire thing?? but the logic is kinda like this 
 	// Filter trainSchedules based on form inputs
 	const filteredTrains = $derived.by(() => {
 		if (!shouldShowResults) return ([] as Train[]);
 
 		return trains.filter(train => {
-			// Check capacity - passenger count must fit in at least one class
-			const hasCapacity = train.capacity.some(cap => cap >= form.psngrCount);
-			if (!hasCapacity) return false;
+			// Check capacity based on selected class type
+				const capacity = train.capacity;
+				if (capacity < form.psngrCount) return false;
+
 
 			// Filter by time if provided
 			if (form.timeStart) {
@@ -119,9 +123,6 @@
 					if (train.arrives < filterTimeStr) return false;
 				}
 			}
-
-			// TODO: In a real app, you'd also filter by route
-			// (check if train stops at both stationFrom and stationTo)
 
 			return true;
 		});
@@ -146,14 +147,10 @@
 		<hr>
 
 		<div class="flex flex-row ">
-			<span class="label"><b>Schedule Filter</b></span>
+			<span class="label"><b>Departs at</b></span>
 
 			<div class="flex flex-wrap w-[620px]">
-				<select class="flex-1 min-w-0 !py-0 mr-2" bind:value={form.filterType}>
-					<option>Departs at</option>
-					<option>Arrives at</option>
-				</select>
-				<input class="flex-1.5 min-w-0" type="datetime-local" bind:value={form.timeStart}>
+				<input class="flex-1.5 min-w-0 w-[300px]" type="datetime-local" bind:value={form.timeStart}>
 				<i class="bi bi-arrow-right"></i>
 				<input class="flex-1 min-w-0" type="time" value={timeEnd} disabled>
 			</div>
@@ -161,21 +158,34 @@
 
 		<hr>
 
-		<div class="flex flex-row ">
-			<span class="label"><b>Passenger Count</b></span>
+		<div class="flex flex-row gap-3">
+			<span class="flex flex-row">
+				<span class="label"><b>Seat Class</b></span>
 
-			<div class="flex flex-row w-[620px] gap-2">
-				<input
-					type="number"
-					min="1"
-					max="6"
-					bind:value={form.psngrCount}
-					class:border-red-400={form.psngrCount < 1}
-				>
-				{#if form.psngrCount < 1}
-					<span class="text-red-500 text-sm self-center ml-2">Minimum 1 passenger</span>
-				{/if}
-			</div>
+				<div class="flex flex-wrap w-[300px]">
+					<select class="flex-1 min-w-0 !py-0 " bind:value={form.classType}>
+						<option value="First">First Class</option>
+						<option value="Business">Business Class</option>
+						<option value="Economy">Economy Class</option>
+					</select>
+				</div>
+			</span>
+
+			<span class="flex flex-row">
+				<span class="label"><b>Seat Count</b></span>
+				<div class="flex flex-row w-[120px] ">
+					<input
+						type="number"
+						min="1"
+						max="6"
+						bind:value={form.psngrCount}
+						class:border-red-400={form.psngrCount < 1}
+					>
+					{#if form.psngrCount < 1}
+						<span class="text-red-500 text-sm self-center ml-2">Minimum 1 passenger</span>
+					{/if}
+				</div>
+			</span>
 		</div>
 
 		<hr>
@@ -223,8 +233,16 @@
 			</section>
 
 			{#each filteredTrains as train}
-				<Row {train} urlInfo={{train: train.id, psngrCount: form.psngrCount, from: form.stationFrom, to: form.stationTo}} />
+				<Row {train} classType={form.classType} capacity=""
+						 urlInfo={{train: train.id, psngrCount: form.psngrCount, from: form.stationFrom, to: form.stationTo}} />
 			{/each}
 		{/if}
 	</section>
 </article>
+
+
+<style>
+	.label {
+			width: 105px;
+	}
+</style>
