@@ -11,9 +11,10 @@ dist
 .output
 
 # Environment files
-.env
+# .env - Commented out to allow build-time access to environment variables
 .env.*
 !.env.example
+!.env
 
 # Git
 .git
