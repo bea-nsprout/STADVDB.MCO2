@@ -6,11 +6,12 @@
 	import { getStations, getStationIndex } from '$lib/data/stations';
 	import { bookingStore } from '$lib/stores/booking';
 	import type { PageData } from './$types';
+	import type { Train } from '$lib/types/train';
 
 	let { data }: { data: PageData } = $props();
 
 	let stationsMenu = getStations()
-	let trains = $state(data.trains)
+	let trains: Train[] = $state(data.trains)
 	let isSearching = $state(false)
 	let hasSearched = $state(false)
 
@@ -23,21 +24,23 @@
 
 		// Build query parameters
 		const params = new URLSearchParams();
+		console.log(form.stationFrom, form.stationTo)
 		params.append('from', form.stationFrom);
 		params.append('to', form.stationTo);
 		params.append("type", (form.filterType === "Departs at") ? "departure" : "arrival");
 		if (form.timeStart) {
 			const date = new Date(form.timeStart);
-			params.append('timeStart', date.toString());
+			params.append('timeStart', date.toISOString());
 			const endDate = date
 			endDate.setHours(endDate.getHours() + 1);
-			params.append('timeEnd', endDate.toString());
+			params.append('timeEnd', endDate.toISOString());
 		}
 
 		try {
 			const response = await fetch(`/api/trainSchedules?${params}`);
 			const data = await response.json();
-			trains = data;
+			console.log(data)
+			trains = data as Train[];
 		} catch (error) {
 			console.error('Error fetching trains:', error);
 		} finally {
@@ -97,7 +100,7 @@
 
 	// Filter trainSchedules based on form inputs
 	const filteredTrains = $derived.by(() => {
-		if (!shouldShowResults) return [];
+		if (!shouldShowResults) return ([] as Train[]);
 
 		return trains.filter(train => {
 			// Check capacity - passenger count must fit in at least one class

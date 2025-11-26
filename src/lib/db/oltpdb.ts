@@ -1,10 +1,11 @@
 import { Kysely, PostgresDialect } from 'kysely';
+import { DATABASE_URL } from '$env/static/private';
 import { Pool } from 'pg'
 import type { DB } from '../../utils/db/oltp-types';
 
 const dialect = new PostgresDialect({
     pool: new Pool({
-        connectionString: process.env.DATABASE_URL,
+        connectionString: DATABASE_URL,
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,

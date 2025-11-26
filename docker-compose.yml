@@ -125,7 +125,7 @@ services:
       PORT: 5173
       NODE_OPTIONS: "--max-old-space-size=256"
     ports:
-      - "8080:5173"
+      - "10000:5173"
     networks:
       - train-network
     depends_on:
