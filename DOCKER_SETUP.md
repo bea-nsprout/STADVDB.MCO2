@@ -617,6 +617,10 @@ docker-compose down -v
 docker-compose up -d --build
 ```
 
+# For db types
+- run "npx kysely-codegen --url postgresql://trainadmin:trainpass123@localhost:5432/train_booking --out-file src/utils/db/oltp-types.ts" for oltp
+- run "npx kysely-codegen --url postgresql://trainadmin:trainpass123@localhost:5434/train_reports --out-file src/utils/db/olap-types.ts" for olap
+
 ## Notes
 
 - The primary database archives WAL files every hour for point-in-time recovery
