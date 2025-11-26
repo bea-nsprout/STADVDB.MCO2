@@ -1,9 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { oltpdb } from '$lib/db/oltpdb';
-import { DATABASE_URL } from '$env/static/private';
-import { getStationIndex, getStations } from '$lib/data/stations';
-import { sql } from 'kysely';
+import { getStationIndex } from '$lib/data/stations';
 
 export const GET: RequestHandler = async ({ url }) => {
 	const fromStn = url.searchParams.get('from');
@@ -18,6 +16,7 @@ export const GET: RequestHandler = async ({ url }) => {
     })
 	const from = getStationIndex(fromStn)
 	const to = getStationIndex(endStn)
+	const cls = "First"
 
 	const direction = from - to > 0 ? "Eastbound" : "Westbound"
 
@@ -30,7 +29,11 @@ export const GET: RequestHandler = async ({ url }) => {
 		.innerJoin("journeys", "journeys.train_no", "trains.id")
 		.innerJoin("routes", "journeys.route", "routes.id")
 		.innerJoin("schedule", "schedule.journey_id", "journeys.id")
+		.innerJoin("tickets", "tickets.journey", "journeys.id")
+		.innerJoin("seat", "seat.id", "tickets.seat")
+		.innerJoin("cars", "cars.id", "seat.car")
 		.where("schedule.station", "in", [fromStn, endStn])
+		.where("tickets.class", "=", cls)
 		.where('journeys.id', 'in', (eb) =>
 			eb.selectFrom("journeys as sub_jny")
 				.innerJoin("routes as sub_rt", "sub_jny.route", "sub_rt.id")
@@ -41,7 +44,22 @@ export const GET: RequestHandler = async ({ url }) => {
 				.where("sub_schd.station", "=", fromStn)
 				.where("routes.direction", "=", direction)
 			)
-		.select(["schedule.departure", "schedule.arrival", "train_no", "capacity"])
+		.groupBy(["journeys.id", "cars.car_no", "tickets.class", "schedule.departure", 
+			"schedule.arrival", 
+			"journeys.train_no", 
+			"trains.capacity", 
+			"cars.seat_count",
+			"schedule.station"
+		])
+		.select(["schedule.departure", 
+			"schedule.arrival", 
+			"journeys.train_no", 
+			"trains.capacity", 
+			"cars.seat_count",
+			"schedule.station",
+			(eb) => eb.fn.count<number>("cars.car_no").as("car_amount"),
+			(eb) => eb.fn.count<number>("tickets.class").as("occupancy")
+		])
 
 	const res = await query.execute()
 	console.log(res)
