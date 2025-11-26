@@ -25,11 +25,20 @@ services:
           memory: 512M
         reservations:
           memory: 256M 
-    command: [
-      "bash",
-      "-c",
-      "chown -R postgres:postgres /var/lib/postgresql/wal_archive && exec su-exec postgres postgres -c wal_level=logical -c max_wal_senders=10 -c max_replication_slots=10 -c archive_mode=on -c archive_command='test ! -f /var/lib/postgresql/wal_archive/%f && cp %p /var/lib/postgresql/wal_archive/%f' -c archive_timeout=3600 -c hba_file=/etc/postgresql/pg_hba.conf"
-    ]
+    command: >
+      bash -c "
+      mkdir -p /var/lib/postgresql/wal_archive &&
+      chown -R postgres:postgres /var/lib/postgresql/wal_archive &&
+      chmod -R 700 /var/lib/postgresql/wal_archive &&
+      exec docker-entrypoint.sh postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c archive_mode=on
+      -c archive_command='test ! -f /var/lib/postgresql/wal_archive/%f && cp %p /var/lib/postgresql/wal_archive/%f'
+      -c archive_timeout=3600
+      -c hba_file=/etc/postgresql/pg_hba.conf
+      "
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U trainadmin -d train_booking"]
       interval: 10s
