@@ -154,6 +154,8 @@ services:
       - web
     profiles:
       - testing
+    ports:
+      - "5665:5665"
     entrypoint: ["tail", "-f", "/dev/null"]  # Keep container running
 
 volumes:
