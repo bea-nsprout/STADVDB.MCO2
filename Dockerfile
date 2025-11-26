@@ -14,6 +14,9 @@ RUN npm ci
 # Copy application source
 COPY . .
 
+# Generate SvelteKit types and config
+RUN npx svelte-kit sync || npx sv sync || true
+
 # Build the application
 RUN npm run build
 
