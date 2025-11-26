@@ -23,14 +23,14 @@
 
 		// Build query parameters
 		const params = new URLSearchParams();
+		params.append('from', form.stationFrom);
+		params.append('to', form.stationTo);
 		if (form.timeStart) {
-			const startTime = new Date(form.timeStart).toTimeString().slice(0, 8);
-			params.append('timeStart', startTime);
-
-			const endDate = new Date(form.timeStart);
+			const date = new Date(form.timeStart);
+			params.append('timeStart', date.toString());
+			const endDate = date
 			endDate.setHours(endDate.getHours() + 1);
-			const endTime = endDate.toTimeString().slice(0, 8);
-			params.append('timeEnd', endTime);
+			params.append('timeEnd', endDate.toString());
 		}
 
 		try {
