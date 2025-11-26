@@ -25,6 +25,7 @@
 		const params = new URLSearchParams();
 		params.append('from', form.stationFrom);
 		params.append('to', form.stationTo);
+		params.append("type", (form.filterType === "Departs at") ? "departure" : "arrival");
 		if (form.timeStart) {
 			const date = new Date(form.timeStart);
 			params.append('timeStart', date.toString());
