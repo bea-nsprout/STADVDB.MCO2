@@ -74,7 +74,7 @@ services:
         chown -R postgres:postgres /var/lib/postgresql/data;
         echo 'standby_mode = on' > /var/lib/postgresql/data/standby.signal;
       fi;
-      exec su-exec postgres postgres
+      exec su-exec postgres postgres -c max_connections=200
       "
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U trainadmin -d postgres"]
