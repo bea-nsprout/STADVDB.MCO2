@@ -25,8 +25,8 @@ const db = new Pool({
 // Configuration
 const CONFIG = {
   TRAINS_COUNT: 10, // 10 trains to handle 20 journeys/day
-  START_DATE: new Date('2024-11-25'),
-  END_DATE: new Date('2024-12-05'),
+  START_DATE: new Date('2025-11-25'),
+  END_DATE: new Date('2025-12-05'),
   JOURNEYS_PER_DAY: 20,
   OPERATING_HOURS: { START: 9, END: 17 }, // 9am to 5pm
   BOOKING_PROBABILITY: 0.65, // 65% of seats will be booked
