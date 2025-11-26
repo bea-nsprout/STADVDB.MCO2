@@ -29,7 +29,7 @@ services:
     command: [
       "bash",
       "-c",
-      "mkdir -p /var/lib/postgresql/wal_archive && chown -R postgres:postgres /var/lib/postgresql/wal_archive && chmod -R 700 /var/lib/postgresql/wal_archive && exec docker-entrypoint.sh postgres -c config_file=/etc/postgresql/postgresql.conf -c hba_file=/etc/postgresql/pg_hba.conf"
+      "chown -R postgres:postgres /var/lib/postgresql/wal_archive && exec su-exec postgres postgres -c wal_level=logical -c max_wal_senders=10 -c max_replication_slots=10 -c archive_mode=on -c archive_command='test ! -f /var/lib/postgresql/wal_archive/%f && cp %p /var/lib/postgresql/wal_archive/%f' -c archive_timeout=3600 -c hba_file=/etc/postgresql/pg_hba.conf"
     ]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U trainadmin -d train_booking"]
@@ -74,7 +74,7 @@ services:
         chown -R postgres:postgres /var/lib/postgresql/data;
         echo 'standby_mode = on' > /var/lib/postgresql/data/standby.signal;
       fi;
-      exec su-exec postgres postgres -c max_connections=200
+      exec su-exec postgres postgres
       "
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U trainadmin -d postgres"]
@@ -125,7 +125,7 @@ services:
       PORT: 5173
       NODE_OPTIONS: "--max-old-space-size=256"
     ports:
-      - "5173:5173"
+      - "10000:5173"
     networks:
       - train-network
     depends_on:

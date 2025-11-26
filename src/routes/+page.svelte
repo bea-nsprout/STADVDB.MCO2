@@ -24,15 +24,16 @@
 
 		// Build query parameters
 		const params = new URLSearchParams();
+		console.log(form.stationFrom, form.stationTo)
 		params.append('from', form.stationFrom);
 		params.append('to', form.stationTo);
 		params.append("type", (form.filterType === "Departs at") ? "departure" : "arrival");
 		if (form.timeStart) {
 			const date = new Date(form.timeStart);
-			params.append('timeStart', date.toString());
+			params.append('timeStart', date.toISOString());
 			const endDate = date
 			endDate.setHours(endDate.getHours() + 1);
-			params.append('timeEnd', endDate.toString());
+			params.append('timeEnd', endDate.toISOString());
 		}
 
 		try {
