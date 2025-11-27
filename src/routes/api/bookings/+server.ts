@@ -158,3 +158,34 @@ export async function POST({ request }) {
     status: 200,
   });
 }
+
+interface DeleteBody {
+    bookingID: string
+}
+
+export async function DELETE({request}) {
+    const {bookingID} : DeleteBody  = await request.json();
+
+    if(!bookingID) return json({message: "needs bookingID.", httpcat: "https://http.cat/status/400"}, {
+        status: 400
+    })
+
+    try {
+        const res = await oltpdb.deleteFrom("bookings")
+        .where("bookings.id", "=", bookingID)
+        .executeTakeFirstOrThrow();
+
+        if(res.numDeletedRows <= 0) return json({message: "Possibly already deleted."}, {
+            status: 404
+        })
+
+        return json({
+            message: "Deleted. fuck yeah"
+        })
+        
+    } catch (error) {
+        return json({message: "Something went wrong.", error}, {
+            status: 500
+        })
+    }
+}
