@@ -12,6 +12,7 @@ export interface BookingData {
 	date: string;
 	timeDepart: string;
 	timeArrive: string;
+	cost: number;
 }
 
 const defaultBooking: BookingData = {
@@ -25,7 +26,8 @@ const defaultBooking: BookingData = {
 	filterType: 'Departs at',
 	date: '',
 	timeDepart: '',
-	timeArrive: ''
+	timeArrive: '',
+	cost: 0
 };
 
 export const bookingStore = writable<BookingData>(defaultBooking);
