@@ -50,7 +50,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			'arriv_sched.arrival'
 		])
 		.select([
-			'journeys.id',
+			'journeys.id as name',
 			'dept_sched.departure as departs',
 			'arriv_sched.arrival as arrives',
 			'journeys.train_no as journey_id',

@@ -234,7 +234,7 @@
 
 			{#each filteredTrains as train}
 				<Row {train} classType={form.classType} capacity=""
-						 urlInfo={{train: train.id, psngrCount: form.psngrCount, from: form.stationFrom, to: form.stationTo}} />
+						 urlInfo={{train: train.name, psngrCount: form.psngrCount, from: form.stationFrom, to: form.stationTo}} />
 			{/each}
 		{/if}
 	</section>
