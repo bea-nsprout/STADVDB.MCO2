@@ -33,7 +33,7 @@
 			const date = new Date(form.timeStart);
 			params.append('timeStart', date.toISOString());
 			const endDate = date
-			endDate.setHours(endDate.getHours() + 1);
+			endDate.setHours(endDate.getHours() + 3);
 			params.append('timeEnd', endDate.toISOString());
 		}
 
@@ -106,7 +106,7 @@
 	const timeEnd = $derived.by(() => {
 		if (!form.timeStart) return "";
 		const date = new Date(form.timeStart);
-		date.setHours(date.getHours() + 1);
+		date.setHours(date.getHours() + 3);
 		return date.toTimeString().slice(0, 5); // Returns "HH:mm"
 	})
 
