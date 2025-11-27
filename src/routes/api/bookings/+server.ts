@@ -67,8 +67,9 @@ export async function POST({ request }) {
     cost_total
   } = await request.json() as BookingData;
 
-  const origin = getStationIndex(stationFrom).toString()
-  const destination = getStationIndex(stationTo).toString()
+  const origin = getStationIndex(stationFrom)
+  const destination = getStationIndex(stationTo)
+  const direction = origin - destination > 0 ? 'Westbound' : 'Eastbound';
   
   const trx = await oltpdb.startTransaction().execute()
   try { 
@@ -82,7 +83,7 @@ export async function POST({ request }) {
       .executeTakeFirst()
     )!.id
 
-    selectedSeats.forEach (async (val) => {
+    const promises = await Promise.allSettled(selectedSeats.map(async (val) => {
       const seat = parseInt((await trx.selectFrom("seat")
         .innerJoin("cars", "cars.id", "seat.car")
         .where("cars.train_id", "=", train)
@@ -93,16 +94,29 @@ export async function POST({ request }) {
         .executeTakeFirstOrThrow()).id)
 
       const check = await trx.selectFrom('journeys')
-        .leftJoin('tickets', 'tickets.journey', 'journeys.id')
-        .where('tickets.journey', "=", journey)
-        .where('tickets.seat', '=', seat)
-        .where('tickets.origin', '>=', origin)
-        .where('tickets.destination', '<=', destination)
-        .select("tickets.ticket_id")
-        .executeTakeFirst()
+          .leftJoin('tickets', 'tickets.journey', 'journeys.id')
+          .where('tickets.journey', "=", journey)
+          .where('tickets.seat', '=', seat)
+          .where('tickets.origin', '>=', origin.toString())
+          .where('tickets.destination', '<=', destination.toString())
+          .$if((direction === "Eastbound"), (qb) => qb.where(eb => 
+              eb.and([
+              eb('tickets.origin', '>=', origin.toString()), 
+              eb('tickets.destination', '<=', destination.toString())
+            ])
+          ))
+          .$if((direction === "Westbound"), (qb) => qb.where(eb => 
+            eb.and([
+              eb('tickets.origin', '<=', origin.toString()), 
+              eb('tickets.destination', '>=', destination.toString())
+            ])
+          ))
+          .select("tickets.ticket_id")
+          .executeTakeFirst()
       
       if(check != undefined)
         throw new Error(`Seat already taken! Car ${val.car} Row ${val.row} + Col ${val.col}`)
+
       else await trx.insertInto("tickets")
         .values({
           booking_id,
@@ -114,7 +128,12 @@ export async function POST({ request }) {
           journey
         })
         .executeTakeFirst()
-    })
+      }))
+    
+    if(promises.filter((promise) => promise.status === 'rejected').length == 0)
+      await trx.commit().execute()
+    else
+      throw new Error(`Something went wrong`)
   } 
   catch (error) {
     console.log(error)

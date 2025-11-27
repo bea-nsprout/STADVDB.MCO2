@@ -15,6 +15,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		});
 	const from = getStationIndex(fromStn);
 	const to = getStationIndex(endStn);
+	const direction = from - to > 0 ? 'Westbound' : 'Eastbound';
 
 	console.log(from, to, journey_id, cls);
 
@@ -25,10 +26,14 @@ export const GET: RequestHandler = async ({ url }) => {
 		.leftJoin('cars', 'cars.id', 'seat.car')
         .where('tickets.journey', "=", journey_id)
         .where('tickets.class', '=', cls)
-		.where(eb => eb.or([
+		.$if((direction === "Eastbound"), (qb) => qb.where(eb => eb.or([
 			eb('tickets.origin', '<', from.toString()), 
 			eb('tickets.destination', '>', to.toString())
-		]))
+		])))
+		.$if((direction === "Westbound"), (qb) => qb.where(eb => eb.or([
+			eb('tickets.origin', '>', from.toString()), 
+			eb('tickets.destination', '<', to.toString())
+		])))
 		.orderBy("cars.id", "asc")
 		.orderBy("seat.column", "asc")
 		.orderBy("seat.row", "asc")
