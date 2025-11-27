@@ -13,6 +13,7 @@ export interface BookingData {
 	timeDepart: string;
 	timeArrive: string;
 	cost: number;
+	email: string;
 }
 
 const defaultBooking: BookingData = {
@@ -27,6 +28,7 @@ const defaultBooking: BookingData = {
 	date: '',
 	timeDepart: '',
 	timeArrive: '',
+	email: '',
 	cost: 0
 };
 
