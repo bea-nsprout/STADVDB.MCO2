@@ -28,6 +28,7 @@
 		params.append('from', form.stationFrom);
 		params.append('to', form.stationTo);
 		params.append("type", (form.filterType === "Departs at") ? "departure" : "arrival");
+		params.append("cls", form.classType)
 		if (form.timeStart) {
 			const date = new Date(form.timeStart);
 			params.append('timeStart', date.toISOString());

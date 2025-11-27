@@ -9,6 +9,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const timeStart = url.searchParams.get('timeStart');
 	const timeEnd = url.searchParams.get('timeEnd');
 	const timeType = url.searchParams.get('type');
+	const cls = url.searchParams.get('cls');
 
 	if (!fromStn || !endStn || !timeStart || !timeEnd || !timeType)
 		return new Response('Missing fields', {
@@ -16,7 +17,6 @@ export const GET: RequestHandler = async ({ url }) => {
 		});
 	const from = getStationIndex(fromStn);
 	const to = getStationIndex(endStn);
-	const cls = 'First';
 
 	const direction = from - to > 0 ? 'Eastbound' : 'Westbound';
 
