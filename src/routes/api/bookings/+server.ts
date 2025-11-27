@@ -17,28 +17,7 @@ export const GET: RequestHandler = async ({url}) => {
     })
     
     try {
-        console.log("hi");
-        const query =  oltpdb.with("filtered_bookings", (db) => db.selectFrom("bookings")
-                                    .where("email", "=", email)
-                                    .selectAll()
-                                    .offset(page * pageContentCount)
-                                    .limit(pageContentCount))
-                       
-                        .selectFrom("filtered_bookings")
-                        .innerJoin("tickets", "filtered_bookings.id", "booking_id")
-                        .innerJoin("journeys", "journeys.id", "tickets.journey")
-                        .innerJoin("station as os", "os.id", "tickets.origin")
-                        .innerJoin("station as ds", "ds.id", "tickets.destination")
-                        .innerJoin("schedule as depart_sched", "depart_sched.station","os.name")
-                        .innerJoin("schedule as arrive_sched", "arrive_sched.station","ds.name")
-                        .whereRef("tickets.journey", "=", "depart_sched.journey_id")
-                        .whereRef("tickets.journey", "=", "arrive_sched.journey_id")
-                        .select(["os.name as origin_station",
-                            "ds.name as destination_station",
-                        "depart_sched.departure", "arrive_sched.arrival",
-                    "tickets.seat", "class", "booking_id", "journeys.id as journey_id"])
-
-        const queryBruh = oltpdb.with("filtered_bookings", (db) => db.selectFrom("bookings")
+        const query = oltpdb.with("filtered_bookings", (db) => db.selectFrom("bookings")
                                     .where("email", "=", email)
                                     .selectAll()
                                     .offset(page * pageContentCount)
@@ -67,11 +46,11 @@ export const GET: RequestHandler = async ({url}) => {
                         ])
                     ).selectFrom("ungrouped_tickets")
                     .select(["booking_id", (eb) => eb.fn.jsonAgg("ticket").as("tickets")])
-                    .groupBy("booking_id")
+                    .groupBy("booking_id");
 
-        
-                    console.log(query.compile().sql)
-        return json(await queryBruh.execute())
+    const values = await query.execute();
+
+        return json(values)
     } catch (error) {
         if(error instanceof DatabaseError) {
         return json(error, {status: 500}); // ;alsdkfj
