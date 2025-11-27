@@ -38,11 +38,34 @@ export const GET: RequestHandler = async ({url}) => {
 
 }
 
-// export const DELETE: RequestHandler = async ({url}) => {
+export async function POST({ request }) {
+  const { 
+    train,
+    classType,
+    stationFrom,
+    stationTo,
+    passengers,
+    selectedSeats,
+    timeStart,
+    filterType,
+    date,
+    timeDepart,
+    timeArrive,
+    cost,
+    email
+  } = await request.json() as BookingData;
+  for (const val in selectedSeats) {
+	const res = await oltpdb.transaction().execute(async (trx) => { 
+		trx.insertInto("bookings")
+      .values({
+        email,
+        
+      })
+	})
+  }
 
-
-    
-	
-
-// 	return json("success", {status: 200})
-// }
+  return new Response(JSON.stringify({ message: 'Data received', body: {} }), {
+    headers: { 'Content-Type': 'application/json' },
+    status: 200,
+  });
+}
