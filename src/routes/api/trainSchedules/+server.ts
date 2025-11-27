@@ -11,7 +11,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const timeType = url.searchParams.get('type');
 	const cls = url.searchParams.get('cls');
 
-	if (!fromStn || !endStn || !timeStart || !timeEnd || !timeType)
+	if (!fromStn || !endStn || !timeStart || !timeEnd || !timeType || !cls)
 		return new Response('Missing fields', {
 			status: 400
 		});
