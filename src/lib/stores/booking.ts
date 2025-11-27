@@ -14,6 +14,7 @@ export interface BookingData {
 	timeArrive: string;
 	cost: number;
 	email: string;
+	cost_total: number;
 }
 
 const defaultBooking: BookingData = {
@@ -29,7 +30,8 @@ const defaultBooking: BookingData = {
 	timeDepart: '',
 	timeArrive: '',
 	email: '',
-	cost: 0
+	cost: 0,
+	cost_total: 0,
 };
 
 export const bookingStore = writable<BookingData>(defaultBooking);
