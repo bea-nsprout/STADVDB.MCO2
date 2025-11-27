@@ -5,7 +5,6 @@ import type { Train } from '$lib/types/train';
 export let train: Train;
 export let classType;
 export let urlInfo;
-export let capacity;
 
 // Map class type to capacity index
 const classIndex = {
@@ -35,6 +34,6 @@ function dateFormatter(str: string): string {
 	<span class="flex-1">{dateFormatter(train.departs)}</span>
 	<span class="flex-1">{dateFormatter(train.arrives)}</span>
 	<span class="flex-2">
-			<ClassType type={classType} {capacity} {urlInfo} {train} />
+			<ClassType type={classType} {urlInfo} {train} />
 	</span>
 </div>

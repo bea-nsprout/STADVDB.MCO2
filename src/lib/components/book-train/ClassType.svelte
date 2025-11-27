@@ -5,7 +5,6 @@
 	export let urlInfo;
 	export let train;
 	export let type="Economy";
-	export let capacity=10;
 	let color = "";
 
 	if (type === "First") {
@@ -31,7 +30,7 @@
 <button style="background-color: {color}" class="flex flex-row justify-between px-1 rounded-s"
 	on:click={handleClick}>
 	<span class="text-white text-[0.8rem]">{type} Class</span>
-	<span class="bg-white h-[80%] text-[0.7rem] w-[1rem] mt-0.5 rounded-xs">{capacity}</span>
+	<!-- <span class="bg-white h-[80%] text-[0.7rem] w-[1rem] mt-0.5 rounded-xs">{capacity}</span> -->
 </button>
 
 <style>
