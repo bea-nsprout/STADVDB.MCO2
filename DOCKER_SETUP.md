@@ -482,6 +482,18 @@ docker exec -it train-db-reports psql -U trainadmin -d train_reports -c "SELECT 
 
 ## Troubleshooting
 
+**For detailed troubleshooting guides, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)**
+
+The comprehensive troubleshooting guide covers:
+- Database connection issues (password authentication failed)
+- Port conflicts with local PostgreSQL
+- Docker container issues
+- Sample data generation problems
+- Windows-specific issues
+- Performance troubleshooting
+
+Quick fixes for common issues:
+
 ### Windows-Specific Issues
 
 **Docker Desktop Not Running:**

@@ -10,6 +10,14 @@
  * Usage:
  *   npx tsx scripts/generate-sample-data.ts
  *   or: npm run generate-data
+ *
+ * Prerequisites:
+ *   - Docker containers must be running: docker-compose up -d db-primary
+ *   - Port 5432 must be available (check for conflicts with local PostgreSQL)
+ *
+ * Troubleshooting:
+ *   If you encounter "password authentication failed" errors, see TROUBLESHOOTING.md
+ *   Common issue: Local PostgreSQL using port 5432 (conflicts with Docker)
  */
 
 import { Pool } from 'pg';
