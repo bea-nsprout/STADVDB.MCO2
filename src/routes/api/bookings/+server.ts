@@ -6,7 +6,7 @@ export const GET: RequestHandler = async ({url}) => {
 
     const email = url.searchParams.get("email");
     const page = Number(url.searchParams.get("page"));
-    const pageContentCount = 50
+    const pageContentCount = 5
 
     
     if(!email) return new Response("Missing email parameter. https://http.cat/status/400", {
@@ -15,13 +15,27 @@ export const GET: RequestHandler = async ({url}) => {
     
     try {
         console.log("hi");
-        const stuff = await oltpdb.selectFrom("bookings")
+        const query =  oltpdb.with("filtered_bookings", (db) => db.selectFrom("bookings")
                                     .where("email", "=", email)
                                     .selectAll()
                                     .offset(page * pageContentCount)
-                                    .limit(pageContentCount)
-                                    .execute();
-        return json(stuff)
+                                    .limit(pageContentCount))
+                       
+                        .selectFrom("filtered_bookings")
+                        .innerJoin("tickets", "filtered_bookings.id", "booking_id")
+                        .innerJoin("journeys", "journeys.id", "tickets.journey")
+                        .innerJoin("station as os", "os.id", "tickets.origin")
+                        .innerJoin("station as ds", "ds.id", "tickets.destination")
+                        .innerJoin("schedule as depart_sched", "depart_sched.station","os.name")
+                        .innerJoin("schedule as arrive_sched", "arrive_sched.station","ds.name")
+                        .whereRef("tickets.journey", "=", "depart_sched.journey_id")
+                        .whereRef("tickets.journey", "=", "arrive_sched.journey_id")
+                        .select(["os.name as origin_station",
+                            "ds.name as destination_station",
+                        "depart_sched.departure", "arrive_sched.arrival",
+                    "tickets.seat", "class", "booking_id"])
+                    console.log(query.compile().sql)
+        return json(await query.execute())
     } catch (error) {
         if(error instanceof DatabaseError) {
         return json(error, {status: 500}); // ;alsdkfj
