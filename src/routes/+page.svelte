@@ -42,17 +42,22 @@
 			const data = await response.json();
 			console.log(data)
 			trains = data as Train[];
+
+			// Test API call only if trains were found
+			if (trains && trains.length > 0) {
+				const testparams = new URLSearchParams();
+				testparams.append('from', form.stationFrom);
+				testparams.append('to', form.stationTo);
+				testparams.append("cls", form.classType)
+				testparams.append('journey', trains[0].journey_id.toString());
+				const testres = await fetch(`/api/trainTickets?${testparams}`);
+				const testdata = await testres.json();
+				console.log(testdata)
+			}
 		} catch (error) {
 			console.error('Error fetching trains:', error);
+			trains = []; // Ensure trains is empty on error
 		} finally {
-			const testparams = new URLSearchParams();
-			testparams.append('from', form.stationFrom);
-			testparams.append('to', form.stationTo);
-			testparams.append("cls", form.classType)
-			testparams.append('journey', trains[0].journey_id.toString());
-			const testres = await fetch(`/api/trainTickets?${testparams}`);
-			const testdata = await testres.json();
-			console.log(testdata)
 			isSearching = false;
 			hasSearched = true;
 		}
