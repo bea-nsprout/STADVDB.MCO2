@@ -375,8 +375,27 @@ async function insertBookingsAndTickets(
         carClassMap.set(car.id, car.type);
       }
 
-      // Book random percentage of seats
-      const seatsToBook = Math.floor(seats.length * CONFIG.BOOKING_PROBABILITY);
+      // Calculate booking probability based on time slot and day of week
+      const journeyHour = journey.date.getUTCHours();
+      const dayOfWeek = journey.date.getDay(); // 0 = Sunday, 5 = Friday
+
+      // Peak hours: 9-10am (hour 1) and 4-5pm (hour 8) in GMT+8
+      const isPeakHour = journeyHour === 1 || journeyHour === 8;
+      const isFriday = dayOfWeek === 5;
+
+      // Base probability: 80% for peak hours, 30% for off-peak
+      let bookingProbability = isPeakHour ? 0.8 : 0.3;
+
+      // Apply 1.2x multiplier for Friday only
+      if (isFriday) {
+        bookingProbability *= 1.2;
+      }
+
+      // Cap at 100% (1.0)
+      bookingProbability = Math.min(bookingProbability, 1.0);
+
+      // Book calculated percentage of seats
+      const seatsToBook = Math.floor(seats.length * bookingProbability);
       const shuffled = [...seats].sort(() => Math.random() - 0.5);
       const bookedSeats = shuffled.slice(0, seatsToBook);
 

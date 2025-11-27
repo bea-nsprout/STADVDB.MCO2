@@ -1,89 +1,63 @@
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-	// Test heatmap data (0-100 scale for each station)
-	// Stations: Tokyo, Shin-Yokohama, Toyohashi, Nagoya, Kyoto, Shin-Osaka
-	const stationDepartures = [85, 65, 45, 90, 70, 55];
-	const stationArrivals = [10, 15, 20, 25, 18, 12];
-
-	// Test data for reservations by class over time
-	const generateDateData = (startValue: number, variance: number, count: number = 12) => {
-		const data = [];
-		const now = new Date();
-		for (let i = 0; i < count; i++) {
-			const date = new Date(now.getFullYear(), now.getMonth() - (count - 1 - i), 1);
-			const value = startValue + Math.floor(Math.random() * variance);
-			data.push({ date, reservations: value });
-		}
-		return data;
-	};
-
-	const reservationsPerClass = [
-		{
-			id: 'First Class',
-			data: generateDateData(20, 15)
-		},
-		{
-			id: 'Business Class',
-			data: generateDateData(50, 25)
-		},
-		{
-			id: 'Economy Class',
-			data: generateDateData(150, 50)
-		}
-	];
-
-	// Calculate total reservations
-	const reservationsTotal = [{
-		id: 'Total Reservations',
-		data: reservationsPerClass[0].data.map((_, i) => ({
-			date: reservationsPerClass[0].data[i].date,
-			reservations: reservationsPerClass.reduce((sum, cls) => sum + cls.data[i].reservations, 0)
+// Helper to convert date strings to Date objects
+function convertDates(data: any[]) {
+	return data.map(series => ({
+		...series,
+		data: series.data.map((item: any) => ({
+			...item,
+			date: new Date(item.date)
 		}))
-	}];
+	}));
+}
 
-	// Test data for revenue by class over time (in thousands)
-	const generateRevenueData = (startValue: number, variance: number, count: number = 12) => {
-		const data = [];
-		const now = new Date();
-		for (let i = 0; i < count; i++) {
-			const date = new Date(now.getFullYear(), now.getMonth() - (count - 1 - i), 1);
-			const value = startValue + Math.floor(Math.random() * variance);
-			data.push({ date, revenue: value });
-		}
-		return data;
-	};
+export const load: PageServerLoad = async ({ fetch }) => {
+	try {
+		// Fetch station traffic data
+		const trafficResponse = await fetch('/api/stationTraffic');
+		const trafficData = await trafficResponse.json();
 
-	const revenuePerClass = [
-		{
-			id: 'First Class',
-			data: generateRevenueData(80, 30)
-		},
-		{
-			id: 'Business Class',
-			data: generateRevenueData(120, 40)
-		},
-		{
-			id: 'Economy Class',
-			data: generateRevenueData(200, 60)
-		}
-	];
+		// Fetch reservations data
+		const reservationsResponse = await fetch('/api/reservations');
+		const reservationsData = await reservationsResponse.json();
 
-	// Calculate total revenue
-	const revenueTotal = [{
-		id: 'Total Revenue',
-		data: revenuePerClass[0].data.map((_, i) => ({
-			date: revenuePerClass[0].data[i].date,
-			revenue: revenuePerClass.reduce((sum, cls) => sum + cls.data[i].revenue, 0)
-		}))
-	}];
+		// Fetch revenue data
+		const revenueResponse = await fetch('/api/revenue');
+		const revenueData = await revenueResponse.json();
 
-	return {
-		stationDepartures,
-		stationArrivals,
-		reservationsPerClass,
-		reservationsTotal,
-		revenuePerClass,
-		revenueTotal
-	};
+		// Fetch reservations by time (heatmap)
+		const reservationsByTimeResponse = await fetch('/api/reservationsByTime');
+		const reservationsByTimeData = await reservationsByTimeResponse.json();
+
+		return {
+			stationDepartures: trafficData.stationDepartures || [],
+			stationArrivals: trafficData.stationArrivals || [],
+			reservationsPerClass: convertDates(reservationsData.reservationsPerClass || []),
+			reservationsTotal: convertDates(reservationsData.reservationsTotal || []),
+			revenuePerClass: convertDates(revenueData.revenuePerClass || []),
+			revenueTotal: convertDates(revenueData.revenueTotal || []),
+			reservationsByTime: reservationsByTimeData.heatmapData || []
+		};
+	} catch (error) {
+		console.error('Error loading info page data:', error);
+
+		// Return empty data on error
+		return {
+			stationDepartures: Array(6).fill(0),
+			stationArrivals: Array(6).fill(0),
+			reservationsPerClass: [
+				{ id: 'First Class', data: [] },
+				{ id: 'Business Class', data: [] },
+				{ id: 'Economy Class', data: [] }
+			],
+			reservationsTotal: [{ id: 'Total Reservations', data: [] }],
+			revenuePerClass: [
+				{ id: 'First Class', data: [] },
+				{ id: 'Business Class', data: [] },
+				{ id: 'Economy Class', data: [] }
+			],
+			revenueTotal: [{ id: 'Total Revenue', data: [] }],
+			reservationsByTime: Array(7).fill(0).map(() => Array(24).fill(0))
+		};
+	}
 };
