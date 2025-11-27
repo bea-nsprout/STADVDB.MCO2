@@ -27,7 +27,7 @@ export const GET: RequestHandler = async ({ url }) => {
         .where('tickets.class', '=', cls)
 		.where(eb => eb.or([
 			eb('tickets.origin', '<', from.toString()), 
-			eb('tickets.destination', '>', from.toString())
+			eb('tickets.destination', '>', to.toString())
 		]))
 		.orderBy("cars.id", "asc")
 		.orderBy("seat.column", "asc")
