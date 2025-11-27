@@ -34,26 +34,6 @@ export const GET: RequestHandler = async ({ url }) => {
 			eb('tickets.origin', '<', to.toString()), 
 			eb('tickets.destination', '>', from.toString())
 		])))
-		// .$if((direction === "Eastbound"), (qb) => qb.where(eb => eb.or([
-		// 	eb.and([
-		// 		eb('tickets.origin', '<', from.toString()), 
-		// 		eb('tickets.origin', '>', to.toString()), 
-		// 	]),
-		// 	eb.and([
-		// 		eb('tickets.destination', '<', from.toString()), 
-		// 		eb('tickets.destination', '>', to.toString()), 
-		// 	])
-		// ])))
-		// .$if((direction === "Westbound"), (qb) => qb.where(eb => eb.or([
-		// 	eb.and([
-		// 		eb('tickets.origin', '>', from.toString()), 
-		// 		eb('tickets.origin', '<', to.toString()), 
-		// 	]),
-		// 	eb.and([
-		// 		eb('tickets.destination', '>', from.toString()), 
-		// 		eb('tickets.destination', '<', to.toString()), 
-		// 	])
-		// ])))
 		.orderBy("cars.id", "asc")
 		.orderBy("seat.column", "asc")
 		.orderBy("seat.row", "asc")
@@ -63,6 +43,7 @@ export const GET: RequestHandler = async ({ url }) => {
             "seat.row"
         ]);
 
+	console.log(query.compile().query)
 	const res = await query.execute();
 	console.log(res);
 
