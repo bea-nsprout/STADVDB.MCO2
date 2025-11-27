@@ -6,7 +6,6 @@ export interface BookingData {
 	stationFrom: string;
 	stationTo: string;
 	passengers: number;
-	selectedSeats: Array<{ car: number; seat: string }>;
 	journey: string; // journey id
 	selectedSeats: Array<{ car: number; col: number, row: number} >;
 	timeStart: string;
@@ -27,6 +26,7 @@ const defaultBooking: BookingData = {
 	passengers: 1,
 	selectedSeats: [],
 	journey: '', // journey id
+	timeStart: '',
 	filterType: 'Departs at',
 	date: '',
 	timeDepart: '',
