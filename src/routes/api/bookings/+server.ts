@@ -2,6 +2,7 @@ import { getStationIndex } from "$lib/data/stations.js";
 import { oltpdb } from "$lib/db/oltpdb";
 import type { BookingData } from "$lib/stores/booking";
 import { json, type RequestHandler } from "@sveltejs/kit"
+import { jsonBuildObject } from "kysely/helpers/postgres";
 import { DatabaseError } from "pg";
 
 export const GET: RequestHandler = async ({url}) => {
@@ -36,8 +37,41 @@ export const GET: RequestHandler = async ({url}) => {
                             "ds.name as destination_station",
                         "depart_sched.departure", "arrive_sched.arrival",
                     "tickets.seat", "class", "booking_id", "journeys.id as journey_id"])
+
+        const queryBruh = oltpdb.with("filtered_bookings", (db) => db.selectFrom("bookings")
+                                    .where("email", "=", email)
+                                    .selectAll()
+                                    .offset(page * pageContentCount)
+                                    .limit(pageContentCount))
+                        .with("ungrouped_tickets", (db) => db
+                        .selectFrom("filtered_bookings")
+                        .innerJoin("tickets", "filtered_bookings.id", "booking_id")
+                        .innerJoin("journeys", "journeys.id", "tickets.journey")
+                        .innerJoin("station as os", "os.id", "tickets.origin")
+                        .innerJoin("station as ds", "ds.id", "tickets.destination")
+                        .innerJoin("schedule as depart_sched", "depart_sched.station","os.name")
+                        .innerJoin("schedule as arrive_sched", "arrive_sched.station","ds.name")
+                        .whereRef("tickets.journey", "=", "depart_sched.journey_id")
+                        .whereRef("tickets.journey", "=", "arrive_sched.journey_id")
+                        .select(["filtered_bookings.id as booking_id", 
+                            (eb) => jsonBuildObject({
+                                "id": eb.ref("ticket_id"),
+                                "origin": eb.ref("os.name"),
+                                "destination": eb.ref("ds.name"),
+                                "departure": eb.ref("depart_sched.departure"),
+                                "arrival": eb.ref("arrive_sched.arrival"),
+                                "seat": eb.ref("tickets.seat"),
+                                "class": eb.ref("class"),
+                                "journey_id": eb.ref('journeys.id')
+                            }).as("ticket")
+                        ])
+                    ).selectFrom("ungrouped_tickets")
+                    .select(["booking_id", (eb) => eb.fn.jsonAgg("ticket").as("tickets")])
+                    .groupBy("booking_id")
+
+        
                     console.log(query.compile().sql)
-        return json(await query.execute())
+        return json(await queryBruh.execute())
     } catch (error) {
         if(error instanceof DatabaseError) {
         return json(error, {status: 500}); // ;alsdkfj
