@@ -1,8 +1,9 @@
 <script>
 	import { fade } from 'svelte/transition';
 
-	export let stationFrom = 0;
-	export let stationTo = 3;
+	// Props are 1-indexed (1=Tokyo, 6=Shin-Osaka) from database
+	export let stationFrom = 1;
+	export let stationTo = 4;
 
 	const stations = ['Tokyo', 'Shin-Yokohama', 'Toyohashi', 'Nagoya', 'Kyoto', 'Shin-Osaka'];
 
@@ -16,7 +17,8 @@
 	];
 
 	let hoveredIndex = null;
-	let lastHoveredIndex = stationFrom;
+	// Convert 1-indexed to 0-indexed for array access
+	let lastHoveredIndex = stationFrom - 1;
 
 	// Preload all images
 	if (typeof window !== 'undefined') {
@@ -26,8 +28,9 @@
 		});
 	}
 
-	$: minStation = Math.min(stationFrom, stationTo);
-	$: maxStation = Math.max(stationFrom, stationTo);
+	// Convert 1-indexed props to 0-indexed for array operations
+	$: minStation = Math.min(stationFrom - 1, stationTo - 1);
+	$: maxStation = Math.max(stationFrom - 1, stationTo - 1);
 
 	$: if (hoveredIndex !== null) {
 		lastHoveredIndex = hoveredIndex;
