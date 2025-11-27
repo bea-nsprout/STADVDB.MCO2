@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import SearchFilter from '$lib/components/SearchFilter.svelte';
 	import { bookingStore } from '$lib/stores/booking';
+	import { formatCar, formatSeat } from '../../../utils/db/formatSeat';
+	import { onMount } from 'svelte';
 
 	const train = $derived(page.url.searchParams.get('train'));
 	const classType = $derived(page.url.searchParams.get('class'));
@@ -27,12 +29,28 @@
 	);
 
 	// Unavailable seats (already booked)
-	let unavailableSeats = $state([
-		{ car: 1, seat: "A2" },
-		{ car: 1, seat: "B5" },
-		{ car: 2, seat: "A3" },
-		{ car: 3, seat: "B1" }
-	]);
+	let unavailableSeats: { car: number, seat: string }[] = $state([]);
+
+	onMount ( async() => {
+		const params = new URLSearchParams()
+		console.log(stationFrom, stationTo, classType, $bookingStore.journey)
+		params.append('from', stationFrom ?? "");
+		params.append('to', stationTo ?? "");
+		params.append("cls", classType ?? "")
+		params.append('journey', $bookingStore.journey);
+
+		const res = await fetch(`/api/trainTickets?${params}`);
+		console.log(`/api/trainTickets?${params}`)
+		const data: { car: string, column: string, row: string }[] = await res.json();
+		unavailableSeats = data.map(seat => {
+			return {
+				car: formatCar(seat.car, classType ?? ""), 
+				seat: formatSeat(seat.car, seat.row, seat.column)
+			}
+		})
+	})
+
+	console.log(unavailableSeats)
 
 	function toggleSeat(seatId) {
 		const seatObj = { car: carCurrent, seat: seatId };

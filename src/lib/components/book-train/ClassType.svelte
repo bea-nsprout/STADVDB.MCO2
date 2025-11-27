@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { bookingStore } from '$lib/stores/booking';
+	import type { Train } from '$lib/types/train';
 
-	export let urlInfo;
-	export let train;
+	export let urlInfo: {train: string, psngrCount: string, from: string, to: string};
+	export let train: Train;
 	export let type="Economy";
 	let color = "";
 
@@ -20,7 +21,9 @@
 		bookingStore.update(store => ({
 			...store,
 			timeDepart: train.departs,
-			timeArrive: train.arrives
+			timeArrive: train.arrives,
+			journey: train.journey_id.toString(),
+			train: train.name
 		}));
 
 		goto(`/book/step2-seats?train=${urlInfo.train || ''}&class=${type}&seats=${urlInfo.psngrCount || 0}&to=${urlInfo.to || ''}&from=${urlInfo.from || ''}`);

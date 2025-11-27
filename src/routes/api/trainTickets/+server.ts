@@ -38,14 +38,11 @@ export const GET: RequestHandler = async ({ url }) => {
 		.orderBy("seat.column", "asc")
 		.orderBy("seat.row", "asc")
 		.select([
-			"seat.car",
+			"cars.car_no as car",
 			"seat.column",
             "seat.row"
         ]);
 
-	console.log(query.compile().query)
 	const res = await query.execute();
-	console.log(res);
-
 	return json(res);
 };

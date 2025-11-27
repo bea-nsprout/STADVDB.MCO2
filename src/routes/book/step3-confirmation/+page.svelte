@@ -21,8 +21,8 @@
 
 	let stationFromIndex = $derived(getStationIndex(booking.stationFrom))
 	let stationToIndex = $derived(getStationIndex(booking.stationTo))
-	let price = getFare(stationFromIndex, stationToIndex, getStationIndex(booking.classType));
-	let priceTotal = price * booking.selectedSeats.length;
+	let price = getFare(stationFromIndex, stationToIndex, booking.classType);
+	let priceTotal = (price ?? 0) * booking.selectedSeats.length;
 
 	// Construct URL for back navigation with all booking data
 	const backToSeatsUrl = $derived(
