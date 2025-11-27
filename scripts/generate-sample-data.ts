@@ -240,7 +240,7 @@ async function insertJourneysAndSchedules(trains: Train[]) {
 
     // Iterate through each day
     while (currentDate <= CONFIG.END_DATE) {
-      const journeysToday: number[] = [];
+      // const journeysToday: number[] = [];
 
       // Create 20 journeys for the day
       const hourSpan = CONFIG.OPERATING_HOURS.END - CONFIG.OPERATING_HOURS.START;
@@ -414,7 +414,7 @@ async function insertBookingsAndTickets(
         // Calculate fare
         const baseFare = FARE_MATRIX[originStation.name]?.[destStation.name] || 5000;
         const cost = Math.floor(baseFare * CLASS_MULTIPLIERS[seatClass as keyof typeof CLASS_MULTIPLIERS]);
-        const confirmStatus = Math.random() > 0.1; // 90% confirmed
+        const confirmStatus = true;
 
         // Create booking
         const bookingResult = await client.query(
