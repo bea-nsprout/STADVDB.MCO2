@@ -15,7 +15,8 @@ export const actions = {
 			timeDepart: formData.get('timeDepart')?.toString() || '',
 			timeArrive: formData.get('timeArrive')?.toString() || '',
 			passengers: parseInt(formData.get('passengers')?.toString() || '0'),
-			seats: JSON.parse(formData.get('seats')?.toString() || '[]')
+			seats: JSON.parse(formData.get('seats')?.toString() || '[]'),
+			cost: parseInt(formData.get('cost')?.toString() || '0')
 		};
 
 		// Validation
