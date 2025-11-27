@@ -23,9 +23,12 @@ export const GET: RequestHandler = async ({ url }) => {
 		.leftJoin('tickets', 'tickets.journey', 'journeys.id')
 		.leftJoin('seat', 'seat.id', 'tickets.seat')
 		.leftJoin('cars', 'cars.id', 'seat.car')
+        .where('tickets.journey', "=", journey_id)
         .where('tickets.class', '=', cls)
-		.where('tickets.origin', '<', fromStn)
-        .where('tickets.destination', '>', endStn)
+		.where(eb => eb.or([
+			eb('tickets.origin', '<', from.toString()), 
+			eb('tickets.destination', '>', from.toString())
+		]))
 		.select([
 			"cars.car_no",
             "cars.seat_count",

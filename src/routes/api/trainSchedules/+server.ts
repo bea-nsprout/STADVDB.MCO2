@@ -18,7 +18,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const from = getStationIndex(fromStn);
 	const to = getStationIndex(endStn);
 
-	const direction = from - to > 0 ? 'Eastbound' : 'Westbound';
+	const direction = from - to > 0 ? 'Westbound' : 'Eastbound';
 
 	console.log(from, to, fromStn, endStn, direction);
 	const tsStart = new Date(timeStart);

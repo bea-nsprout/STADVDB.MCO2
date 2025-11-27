@@ -45,6 +45,14 @@
 		} catch (error) {
 			console.error('Error fetching trains:', error);
 		} finally {
+			const testparams = new URLSearchParams();
+			testparams.append('from', form.stationFrom);
+			testparams.append('to', form.stationTo);
+			testparams.append("cls", form.classType)
+			testparams.append('journey', trains[0].journey_id.toString());
+			const testres = await fetch(`/api/trainTickets?${testparams}`);
+			const testdata = await testres.json();
+			console.log(testdata)
 			isSearching = false;
 			hasSearched = true;
 		}
