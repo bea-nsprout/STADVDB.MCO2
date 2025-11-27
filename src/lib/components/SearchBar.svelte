@@ -1,39 +1,28 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 
-     let input = $state("");
-     let testData = ['Blix', 'Bea', 'JP', 'Jericho', 'Ross']
+let input = $state("");               
+const { dataList } = $props<{ dataList: { email: string; id: string }[] }>();
 
-     let filteredData = $derived.by(()=> {
-        let lowercaseInput: string = input.toLowerCase();
-        let lowercaseTest:string[] = []
-        testData.forEach((item)=>{
-            item = item.toLowerCase()
-            lowercaseTest.push(item)
-        })
+let filteredData = $derived.by<{ email: string; id: string }[]>(() => {
+    const query = input.toLowerCase();
+    if (!query) return [];
 
-        let newArray: string[] = []
-
-        for(let i = 0; i < lowercaseTest.length;i++){
-            if(lowercaseTest[i].includes(lowercaseInput)){
-                newArray.push(testData[i])
-            }
-        }
-        return newArray
-     })
-
-    
+    return dataList
+        .filter((item: { email: string; id: string }) => item.email.toLowerCase().includes(query))
+        .slice(0, 10);
+});
 </script>
 
 <div class = "flex flex-col">
     <div>
-        <input type = "search" class = "inputField" bind:value = {input} placeholder = "Enter Name...">
+        <input type = "search" class = "inputField" bind:value={input} placeholder = "Enter Name...">
     </div>
     {#if filteredData.length > 0 && input !== ""}
     <div class = "searchResults">
         {#each filteredData as result}
             <div class = "indivResult" on:click = {()=> goto('/cancelBooking/userBookings')}>
-                {result}
+                {result.email}
             </div>
         {/each}
     </div>

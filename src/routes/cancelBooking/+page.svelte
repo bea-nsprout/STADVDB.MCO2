@@ -1,7 +1,12 @@
 <script lang="ts">
+    let names: {email: string, id: string}[] = [];
 	import Header from '$lib/components/Header.svelte';
     import TrainMap from '$lib/components/TrainMap.svelte';
     import SearchBar from '$lib/components/SearchBar.svelte';
+
+   export let data: { names: {email: string, id: string}[] };
+   names = data.names ?? [];
+   
 </script>
 
 <div> <!--Container Div-->
@@ -10,10 +15,10 @@
         <TrainMap/>
         <div class = "mt-20 flex flex-col gap-y-5"> <!--Label and Search Bar-->
             <div class = "text-3xl font-bold text-[var(--color-accent)]">
-                Search Name
+                Search Email
             </div>
             <div>
-                <SearchBar/>
+                <SearchBar dataList = {names}/>
             </div>
 
         </div>

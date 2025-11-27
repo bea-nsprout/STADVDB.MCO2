@@ -5,6 +5,22 @@ import { json, type RequestHandler } from "@sveltejs/kit"
 import { jsonBuildObject } from "kysely/helpers/postgres";
 import { DatabaseError } from "pg";
 
+
+export async function getAllBookings(): Promise<{ email: string; id: string }[]>{
+  try{
+    const users = await oltpdb.selectFrom("bookings").selectAll().execute();
+    return users.map((row) => ({
+      email: row.email,
+      id: row.id
+    }));
+  }
+
+  catch(error){
+    console.log(error);
+    return []  
+  }
+}
+
 export const GET: RequestHandler = async ({url}) => {
 
     const email = url.searchParams.get("email");
@@ -12,7 +28,7 @@ export const GET: RequestHandler = async ({url}) => {
     const pageContentCount = 5
 
     
-    if(!email) return json({message: "Missing email parameter. https://http.cat/status/400"}, {
+    if(!email) return new Response("Missing email parameter. https://http.cat/status/400", {
         status: 400
     })
     
@@ -59,12 +75,6 @@ export const GET: RequestHandler = async ({url}) => {
         return json(error, {status: 500});
 
     }
-
-
-    
-
-
-
 }
 
 export async function POST({ request }) {
@@ -157,35 +167,4 @@ export async function POST({ request }) {
     headers: { 'Content-Type': 'application/json' },
     status: 200,
   });
-}
-
-interface DeleteBody {
-    bookingID: string
-}
-
-export async function DELETE({request}) {
-    const {bookingID} : DeleteBody  = await request.json();
-
-    if(!bookingID) return json({message: "needs bookingID.", httpcat: "https://http.cat/status/400"}, {
-        status: 400
-    })
-
-    try {
-        const res = await oltpdb.deleteFrom("bookings")
-        .where("bookings.id", "=", bookingID)
-        .executeTakeFirstOrThrow();
-
-        if(res.numDeletedRows <= 0) return json({message: "Possibly already deleted."}, {
-            status: 404
-        })
-
-        return json({
-            message: "Deleted. fuck yeah"
-        })
-        
-    } catch (error) {
-        return json({message: "Something went wrong.", error}, {
-            status: 500
-        })
-    }
 }
