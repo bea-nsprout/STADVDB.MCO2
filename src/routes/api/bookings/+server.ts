@@ -35,7 +35,7 @@ export const GET: RequestHandler = async ({url}) => {
                         .select(["os.name as origin_station",
                             "ds.name as destination_station",
                         "depart_sched.departure", "arrive_sched.arrival",
-                    "tickets.seat", "class", "booking_id"])
+                    "tickets.seat", "class", "booking_id", "journeys.id as journey_id"])
                     console.log(query.compile().sql)
         return json(await query.execute())
     } catch (error) {
