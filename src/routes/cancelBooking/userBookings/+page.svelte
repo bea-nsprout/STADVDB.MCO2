@@ -3,6 +3,8 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
     import TrainMap from '$lib/components/TrainMap.svelte';
+   
+    export let data
 
     let cancelledBooking = 0;
     let modal: HTMLElement | null = null;
@@ -33,27 +35,28 @@
         <TrainMap/>
         <div class = "mt-20 flex flex-col gap-y-5"> <!-- Name and Bookings List-->
             <div class = "text-3xl font-bold text-[var(--color-accent)]">
-                [USERNAME]'s Bookings
+                 Bookings For {data.email}
             </div> 
             <div class = "flex flex-col gap-y-5"> <!--Bookings List-->
+                {#each data.bookings as booking, i}
                 <div class = "Booking"> <!--Booking needs to be looped once db is available-->
                     <div class = "flex flex-row">
                         <div class = "bookinglabel">
-                            Booking 1
+                            Booking {i+1}
                         </div>
                         <div>
-                            <i class="fa-solid fa-trash" on:click = {() => openModal(1)} role = "button"/>
+                            <i class="fa-solid fa-trash" on:click = {() => openModal(i+1)} role = "button"/>
                         </div>
                     </div>
                     <div class = "text-[var(--color-accent)] font-bold text-3xl flex flex-row">
                         <div class = "station-from">
-                            Shin-Osaka
+                            {booking.tickets[0].origin}
                         </div>
                         <div class = "text-black">
                             to
                         </div>
                         <div class = "station-to">
-                           Shin-Yokohama 
+                           {booking.tickets[0].destination}
                         </div>
                     </div>
                     <div>
@@ -64,24 +67,29 @@
                             Train XXXX
                         </div>
                         <div>
-                            <span class = "text-[var(--color-accent)]">Business</span> Class
+                            <span class = "text-[var(--color-accent)]">{booking.tickets[0].class}</span> Class
                         </div>
                         <div>
-                            Seat: <span class = "text-[var(--color-accent)]">2-D4C</span>
+                            Seat{#if booking.tickets.length > 1} s {/if}: <span class = "text-[var(--color-accent)]">
+                                        {#each booking.tickets as ticket}
+                                            {ticket.seat} &nbsp
+                                        {/each}
+                                  </span>
                         </div>
                     </div>
                     <div class = "flex flex-row gap-x-41 text-md font-bold">
                         <div>
-                            mm/dd/yy
+                            {booking.tickets[0].departure.split('T')[0]}
                         </div>
                         <div>
-                            Departs <span class = "text-[var(--color-accent)]">0:00</span>
+                            Departs <span class = "text-[var(--color-accent)]">{booking.tickets[0].departure.split('T')[1].split(':')[0]}:{booking.tickets[0].departure.split('T')[1].split(':')[1]}</span>
                         </div>
                         <div>
-                            Arrives <span class = "text-[var(--color-accent)]">0:00</span>
+                            Arrives <span class = "text-[var(--color-accent)]">{booking.tickets[0].arrival.split('T')[1].split(':')[0]}:{booking.tickets[0].arrival.split('T')[1].split(':')[1]}</span>
                         </div>
                     </div>
                 </div>
+                {/each}
             </div>
         </div>
     </div>

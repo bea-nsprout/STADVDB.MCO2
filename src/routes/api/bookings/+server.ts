@@ -6,13 +6,11 @@ import { jsonBuildObject } from "kysely/helpers/postgres";
 import { DatabaseError } from "pg";
 
 
-export async function getAllBookings(): Promise<{ email: string; id: string }[]>{
+export async function getAllBookings(): Promise<String[]>{
   try{
-    const users = await oltpdb.selectFrom("bookings").selectAll().execute();
-    return users.map((row) => ({
-      email: row.email,
-      id: row.id
-    }));
+    const users = await oltpdb.selectFrom("bookings").distinct().select("email").execute();
+    console.log(users);
+    return users.map((row) => (row.email));
   }
 
   catch(error){

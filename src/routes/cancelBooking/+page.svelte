@@ -1,10 +1,10 @@
 <script lang="ts">
-    let names: {email: string, id: string}[] = [];
+    let names:string[] = [];
 	import Header from '$lib/components/Header.svelte';
     import TrainMap from '$lib/components/TrainMap.svelte';
     import SearchBar from '$lib/components/SearchBar.svelte';
 
-   export let data: { names: {email: string, id: string}[] };
+   export let data: { names: string[] };
    names = data.names ?? [];
    
 </script>

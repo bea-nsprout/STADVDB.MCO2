@@ -2,14 +2,14 @@
 	import { goto } from "$app/navigation";
 
 let input = $state("");               
-const { dataList } = $props<{ dataList: { email: string; id: string }[] }>();
+const { dataList } = $props<{ dataList: string[] }>();
 
-let filteredData = $derived.by<{ email: string; id: string }[]>(() => {
+let filteredData = $derived.by<string[]>(() => {
     const query = input.toLowerCase();
     if (!query) return [];
 
     return dataList
-        .filter((item: { email: string; id: string }) => item.email.toLowerCase().includes(query))
+        .filter((item: string) => item.toLowerCase().includes(query))
         .slice(0, 10);
 });
 </script>
@@ -21,8 +21,8 @@ let filteredData = $derived.by<{ email: string; id: string }[]>(() => {
     {#if filteredData.length > 0 && input !== ""}
     <div class = "searchResults">
         {#each filteredData as result}
-            <div class = "indivResult" on:click = {()=> goto('/cancelBooking/userBookings')}>
-                {result.email}
+            <div class = "indivResult" on:click = {()=> goto('/cancelBooking/userBookings?email=' + result)}>
+                {result}
             </div>
         {/each}
     </div>
