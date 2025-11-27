@@ -2,6 +2,7 @@
 	import Toggle from '$lib/components/Toggle.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import TrainHeatmap from '$lib/components/reports/TrainHeatmap.svelte';
+	import TimeHeatmap from '$lib/components/reports/TimeHeatmap.svelte';
 	import LineChart from '$lib/components/reports/LineChart.svelte';
 	import type { PageData } from './$types';
 
@@ -14,6 +15,7 @@
 	let reservationsTotal = data.reservationsTotal;
 	let revenuePerClass = data.revenuePerClass;
 	let revenueTotal = data.revenueTotal;
+	let reservationsByTime = data.reservationsByTime;
 
 	// Tab state for station heatmap
 	let selectedTab = $state<'departures' | 'arrivals'>('departures');
@@ -78,7 +80,14 @@
 			{/if}
 		</section>
 
-		<!--Report #2: [LineChart] Number of Reservations for Class/Train per time period -->
+		<!--Report #2: Reservations by Time of Day -->
+		<section class="white">
+			<h1><i class="bi bi-clock icon-accent"></i> Reservations by Time of Day</h1>
+			<p class="text-sm mb-4">Peak reservation times throughout the week</p>
+			<TimeHeatmap heatmapData={reservationsByTime} />
+		</section>
+
+		<!--Report #3: [LineChart] Number of Reservations for Class/Train per time period -->
 		<section class="white">
 			<h1><i class="bi bi-calendar-check icon-accent"></i> Reservations Over Time</h1>
 
@@ -122,7 +131,7 @@
 			{/if}
 		</section>
 
-		<!--Report #3: [LineChart] Revenue by Class Over Time -->
+		<!--Report #4: [LineChart] Revenue by Class Over Time -->
 		<section class="white">
 			<h1><i class="bi bi-cash-stack icon-green"></i> Revenue Over Time</h1>
 

@@ -135,6 +135,11 @@
 			return num.toFixed(2).toString();
 		}
 	}
+
+	// Add commas to numbers
+	function formatWithCommas(num) {
+		return Math.round(num).toLocaleString('en-US');
+	}
 </script>
 
 <div class="chart-container">
@@ -179,7 +184,7 @@
 					{#if horizontalGrid}
 						<line class="tick-grid" x1={insetLeft} x2={width - marginLeft - marginRight}/>
 					{/if}
-					<text  x="-{marginLeft}" y="5">{tick}</text>
+					<text  x="-{marginLeft}" y="5">{formatWithCommas(tick)}</text>
 				</g>
 			{/each}
 			<text x="-{marginLeft}" y={marginTop - 55} fill="black">{yLabel}</text>
@@ -233,7 +238,7 @@
 {#if dotInfo}
 	<div class="tooltip" style='position:fixed; left:{dotInfo[2].clientX + 12}px; top:{dotInfo[2].clientY + 12}px; pointer-events:none; background-color:{tooltipBackground}; color:{tooltipTextColor}'>
 		{subsets ? subsets[points[dotInfo[1]].color] : ''}:
-		{points[dotInfo[1]].x.getFullYear()}: {Math.round(points[dotInfo[1]].y)}{yFormat}
+		{points[dotInfo[1]].x.getFullYear()}: {formatWithCommas(points[dotInfo[1]].y)}{yFormat}
 	</div>
 {/if}
 
