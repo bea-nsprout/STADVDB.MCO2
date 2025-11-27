@@ -104,28 +104,28 @@
 	// Filter trainSchedules based on form inputs
 	const filteredTrains = $derived.by(() => {
 		if (!shouldShowResults) return ([] as Train[]);
+		 return trains
+		// return trains.filter(train => {
+		// 	// Check capacity based on selected class type
+		// 		const capacity = train.capacity;
+		// 		if (capacity < form.psngrCount) return false;
 
-		return trains.filter(train => {
-			// Check capacity based on selected class type
-				const capacity = train.capacity;
-				if (capacity < form.psngrCount) return false;
 
+		// 	// Filter by time if provided
+		// 	if (form.timeStart) {
+		// 		const filterTime = new Date(form.timeStart);
+		// 		const filterTimeStr = filterTime.toTimeString().slice(0, 5); // "HH:mm"
 
-			// Filter by time if provided
-			if (form.timeStart) {
-				const filterTime = new Date(form.timeStart);
-				const filterTimeStr = filterTime.toTimeString().slice(0, 5); // "HH:mm"
+		// 		// Compare time based on filter type
+		// 		if (form.filterType === "Departs at") {
+		// 			if (train.departs < filterTimeStr) return false;
+		// 		} else if (form.filterType === "Arrives at") {
+		// 			if (train.arrives < filterTimeStr) return false;
+		// 		}
+		// 	}
 
-				// Compare time based on filter type
-				if (form.filterType === "Departs at") {
-					if (train.departs < filterTimeStr) return false;
-				} else if (form.filterType === "Arrives at") {
-					if (train.arrives < filterTimeStr) return false;
-				}
-			}
-
-			return true;
-		});
+		// 	return true;
+		// });
 	})
 </script>
 

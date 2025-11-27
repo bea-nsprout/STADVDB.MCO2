@@ -1,6 +1,6 @@
 export interface Train {
-	id: string;
+	id: string; // train id/name
 	departs: string;
 	arrives: string;
-	capacity: number; // capacity for the selected class
+	journey_id: number; // journey id
 }

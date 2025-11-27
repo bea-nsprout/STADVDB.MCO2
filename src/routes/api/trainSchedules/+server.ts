@@ -44,24 +44,17 @@ export const GET: RequestHandler = async ({ url }) => {
 			'journeys.id',
 			'tickets.class',
 			'journeys.train_no',
-			'cars.car_no',
-			'cars.seat_count',
+			/* "cars.car_no", 
+			"cars.seat_count",*/
 			'dept_sched.departure',
-			'arriv_sched.arrival',
-			'journeys.id',
-			'dept_sched.id'
+			'arriv_sched.arrival'
 		])
 		.select([
-			'dept_sched.departure',
-			'arriv_sched.arrival',
-			'journeys.train_no',
-			'dept_sched.id',
-			(eb) =>
-				eb(
-					(oltpdb.fn.count<number>('cars.car_no'), '*', 'cars.seat_count'),
-					'-',
-					oltpdb.fn.count<number>('tickets.class')
-				).as('occupied')
+			'journeys.id',
+			'dept_sched.departure as departs',
+			'arriv_sched.arrival as arrives',
+			'journeys.train_no as journey_id',
+			// 	(eb) => eb("cars.seat_count", "-", oltpdb.fn.count<number>("tickets.class")).as("occupied")
 		]);
 
 	const res = await query.execute();
