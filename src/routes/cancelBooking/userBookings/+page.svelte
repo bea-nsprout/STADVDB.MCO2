@@ -1,28 +1,44 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <script lang="ts">
+	import { invalidate } from '$app/navigation';
 	import Header from '$lib/components/Header.svelte';
     import TrainMap from '$lib/components/TrainMap.svelte';
    
     export let data
 
+    
     let cancelledBooking = 0;
+    let cancelledID = "";
     let modal: HTMLElement | null = null;
 
-    function openModal(bookingNumber: number) {
+    function openModal(bookingNumber: number, bookingID: string) {
         cancelledBooking = bookingNumber;
+        cancelledID = bookingID;
         if (modal) {
             modal.style.display = "block";
         }
     }
 
-    
-    function deleteBooking() {
-        // Placeholder for delete booking logic
-        if (modal) {
-            modal.style.display = "none";
-        }
-    }
+async function deleteBooking(bookingID: string) {
+    console.log(bookingID)
+  const res = await fetch('/api/bookings', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ bookingID }) // send the bookingID in JSON
+  });
+
+  if(res.ok){
+    location.reload();
+  }
+
+  
+  if(modal) {
+    modal.style.display = "none";
+  }
+}
 </script>
 <svelte:window on:click={(event) => {
     if (modal && event.target === modal) {
@@ -45,7 +61,7 @@
                             Booking {i+1}
                         </div>
                         <div>
-                            <i class="fa-solid fa-trash" on:click = {() => openModal(i+1)} role = "button"/>
+                            <i class="fa-solid fa-trash" on:click = {() => openModal(i+1, booking.booking_id)} role = "button"/>
                         </div>
                     </div>
                     <div class = "text-[var(--color-accent)] font-bold text-3xl flex flex-row">
@@ -100,7 +116,7 @@
                 Cancel <span class = "text-[var(--color-accent)]"> Booking {cancelledBooking}? </span>
             </div>
             <div>
-                <button class = "bg-red-500 text-white font-bold px-4 py-2 rounded mr-4" on:click = {() => deleteBooking()} id ="delete">
+                <button class = "bg-red-500 text-white font-bold px-4 py-2 rounded mr-4" on:click = {() => deleteBooking(cancelledID)} id ="delete">
                     Delete Booking
                 </button>
                 <button class = "bg-green-300 text-white font-bold px-4 py-2 rounded" on:click = {() => {if (modal) {modal.style.display = "none";}}} id= "keep">
