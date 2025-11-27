@@ -8,6 +8,8 @@ export interface BookingData {
 	passengers: number;
 	selectedSeats: Array<{ car: number; seat: string }>;
 	journey: string; // journey id
+	selectedSeats: Array<{ car: number; col: number, row: number} >;
+	timeStart: string;
 	filterType: string;
 	date: string;
 	timeDepart: string;
