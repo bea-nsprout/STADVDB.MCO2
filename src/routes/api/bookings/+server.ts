@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({url}) => {
     const pageContentCount = 5
 
     
-    if(!email) return new Response("Missing email parameter. https://http.cat/status/400", {
+    if(!email) return json({message: "Missing email parameter. https://http.cat/status/400"}, {
         status: 400
     })
     
