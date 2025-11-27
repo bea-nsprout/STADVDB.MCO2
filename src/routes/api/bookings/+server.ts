@@ -1,4 +1,4 @@
-import { getStationIndex } from "$lib/data/stations.js";
+import { getDirection, getStationIndex } from "$lib/data/stations.js";
 import { oltpdb } from "$lib/db/oltpdb";
 import type { BookingData } from "$lib/stores/booking";
 import { json, type RequestHandler } from "@sveltejs/kit"
@@ -90,7 +90,7 @@ export async function POST({ request }) {
 
   const origin = getStationIndex(stationFrom)
   const destination = getStationIndex(stationTo)
-  const direction = origin - destination > 0 ? 'Westbound' : 'Eastbound';
+  const direction = getDirection(origin, destination)
   
   const trx = await oltpdb.startTransaction().execute()
   try { 
@@ -120,18 +120,14 @@ export async function POST({ request }) {
           .where('tickets.seat', '=', seat)
           .where('tickets.origin', '>=', origin.toString())
           .where('tickets.destination', '<=', destination.toString())
-          .$if((direction === "Eastbound"), (qb) => qb.where(eb => 
-              eb.and([
-              eb('tickets.origin', '>=', origin.toString()), 
-              eb('tickets.destination', '<=', destination.toString())
-            ])
-          ))
-          .$if((direction === "Westbound"), (qb) => qb.where(eb => 
-            eb.and([
-              eb('tickets.origin', '<=', origin.toString()), 
-              eb('tickets.destination', '>=', destination.toString())
-            ])
-          ))
+          .$if((direction === "Eastbound"), (qb) => qb.where(eb => eb.and([
+            eb('tickets.origin', '>', destination.toString()), 
+            eb('tickets.destination', '<', origin.toString())
+          ])))
+          .$if((direction === "Westbound"), (qb) => qb.where(eb => eb.and([
+            eb('tickets.origin', '<', destination.toString()), 
+            eb('tickets.destination', '>', origin.toString())
+          ])))
           .select("tickets.ticket_id")
           .executeTakeFirst()
       
@@ -159,10 +155,61 @@ export async function POST({ request }) {
   catch (error) {
     console.log(error)
     await trx.rollback().execute()
+    return new Response(JSON.stringify({ message: 'Booking failed! https://http.cat/status/400' }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 400,
+    });
   }
 
-  return new Response(JSON.stringify({ message: 'Data received', body: {} }), {
-    headers: { 'Content-Type': 'application/json' },
-    status: 200,
-  });
+	return new Response(JSON.stringify({ message: 'Booking confirmed!' }), {
+		headers: { 'Content-Type': 'application/json' },
+		status: 200
+	});
+}
+
+
+
+
+
+
+interface DeleteBody {
+	bookingID: string;
+}
+
+export async function DELETE({ request }) {
+	const { bookingID }: DeleteBody = await request.json();
+
+	if (!bookingID)
+		return json(
+			{ message: 'needs bookingID.', httpcat: 'https://http.cat/status/400' },
+			{
+				status: 400
+			}
+		);
+
+	try {
+		const res = await oltpdb
+			.deleteFrom('bookings')
+			.where('bookings.id', '=', bookingID)
+			.executeTakeFirstOrThrow();
+
+		if (res.numDeletedRows <= 0)
+			return json(
+				{ message: 'Possibly already deleted.' },
+				{
+					status: 404
+				}
+			);
+
+		return json({
+			message: 'Deleted. fuck yeah'
+		});
+	} catch (error) {
+		return json(
+			{ message: 'Something went wrong.', error },
+			{
+				status: 500
+			}
+		);
+	}
 }

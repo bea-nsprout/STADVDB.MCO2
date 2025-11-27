@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { oltpdb } from '$lib/db/oltpdb';
-import { getStationIndex } from '$lib/data/stations';
+import { getDirection, getStationIndex } from '$lib/data/stations';
 
 export const GET: RequestHandler = async ({ url }) => {
 	const fromStn = url.searchParams.get('from');
@@ -15,7 +15,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		});
 	const from = getStationIndex(fromStn);
 	const to = getStationIndex(endStn);
-	const direction = from - to > 0 ? 'Westbound' : 'Eastbound';
+	const direction = getDirection(from, to)
 
 	console.log(from, to, journey_id, cls);
 
@@ -26,13 +26,13 @@ export const GET: RequestHandler = async ({ url }) => {
 		.leftJoin('cars', 'cars.id', 'seat.car')
         .where('tickets.journey', "=", journey_id)
         .where('tickets.class', '=', cls)
-		.$if((direction === "Eastbound"), (qb) => qb.where(eb => eb.or([
-			eb('tickets.origin', '<', from.toString()), 
-			eb('tickets.destination', '>', to.toString())
+		.$if((direction === "Eastbound"), (qb) => qb.where(eb => eb.and([
+			eb('tickets.origin', '>', to.toString()), 
+			eb('tickets.destination', '<', from.toString())
 		])))
-		.$if((direction === "Westbound"), (qb) => qb.where(eb => eb.or([
-			eb('tickets.origin', '>', from.toString()), 
-			eb('tickets.destination', '<', to.toString())
+		.$if((direction === "Westbound"), (qb) => qb.where(eb => eb.and([
+			eb('tickets.origin', '<', to.toString()), 
+			eb('tickets.destination', '>', from.toString())
 		])))
 		.orderBy("cars.id", "asc")
 		.orderBy("seat.column", "asc")
@@ -43,6 +43,7 @@ export const GET: RequestHandler = async ({ url }) => {
             "seat.row"
         ]);
 
+	console.log(query.compile().query)
 	const res = await query.execute();
 	console.log(res);
 
