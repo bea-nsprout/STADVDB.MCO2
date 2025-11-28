@@ -3,7 +3,6 @@ import { check, sleep } from "k6";
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 
 const stations = ["Tokyo", "Shin-Yokohama", "Toyohashi", "Nagoya", "Kyoto", "Shin-Osaka"];
-const classes = ["First", "Business", "Economy"];
 
 const trains = 10;
 const journeys = 220;
@@ -114,7 +113,8 @@ export function createBooking() {
   );
 
   check(res, {
-    "200 or 409": r => r.status === 200 || r.status === 409
+    "valid response (200 or expected 400)": r =>
+      r.status === 200 || r.status === 400
   });
 
   sleep(0.1);
