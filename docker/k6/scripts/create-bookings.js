@@ -118,3 +118,9 @@ export function createBooking() {
 
   sleep(0.1);
 }
+
+export function handleSummary(data) {
+  return {
+    "/results/create_bookings.html": htmlReport(data),
+  };
+}
