@@ -122,18 +122,17 @@ export async function POST({ request }) {
 		cost_total
 	);
 
-	// return json({ message: 'YIPEE' });
 
 	const trx = await oltpdb.startTransaction().setIsolationLevel('serializable').execute();
 	try {
-		const booking_id = (await trx
-			.insertInto('bookings')
-			.values({
-				email,
-				cost_total
-			})
-			.returning('bookings.id')
-			.executeTakeFirst())!.id;
+		const { booking_id } = await trx
+    .insertInto('bookings')
+    .values({
+        email,
+        cost_total
+    })
+    .returning((eb) => eb.ref('id').as('booking_id')) 
+    .executeTakeFirstOrThrow();
 
 		const promises = await Promise.allSettled(
 			selectedSeats.map(async (val) => {
@@ -144,7 +143,7 @@ export async function POST({ request }) {
 						.where('cars.train_id', '=', train)
 						.where('cars.car_no', '=', val.car)
 						.where('seat.row', '=', val.row)
-						.where('seat.column', '=', val.col)
+						.where('seat.column', '=', val.column)
 						.select('seat.id')
 						.compile().sql
 				);
@@ -156,7 +155,7 @@ export async function POST({ request }) {
 							.where('cars.train_id', '=', train)
 							.where('cars.car_no', '=', val.car)
 							.where('seat.row', '=', val.row)
-							.where('seat.column', '=', val.col)
+							.where('seat.column', '=', val.column)
 							.select('seat.id')
 							.executeTakeFirstOrThrow()
 					).id
@@ -190,7 +189,7 @@ export async function POST({ request }) {
 					.executeTakeFirst();
 
 				if (check != undefined)
-					throw new Error(`Seat already taken! Car ${val.car} Row ${val.row} + Col ${val.col}`);
+					throw new Error(`Seat already taken! Car ${val.car} Row ${val.row} + Col ${val.column}`);
 				else
 					await trx
 						.insertInto('tickets')
