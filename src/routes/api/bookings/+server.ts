@@ -122,7 +122,7 @@ export async function POST({ request }) {
 		cost_total
 	);
 
-	const trx = await oltpdb.startTransaction().setIsolationLevel('serializable').execute();
+	const trx = await oltpdb.startTransaction().setIsolationLevel("repeatable read").execute();
 	try {
 		const { booking_id } = await trx
 			.insertInto('bookings')
