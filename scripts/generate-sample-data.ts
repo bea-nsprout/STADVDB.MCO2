@@ -272,7 +272,7 @@ async function insertJourneysAndSchedules(trains: Train[]) {
         const departureMinute = Math.floor(minutesFromStart % 60);
 
         const baseTime = new Date(currentDate);
-        baseTime.setHours(departureHour, departureMinute, 0, 0);
+        baseTime.setUTCHours(departureHour, departureMinute, 0, 0);
 
         journeys.push({ id: journeyId, trainId: train.id, route, date: new Date(baseTime) });
 
@@ -357,11 +357,14 @@ async function insertBookingsAndTickets(
 
   let bookingCount = 0;
   let ticketCount = 0;
+  let totalJourneys = journeys.length;
+  let processedJourneys = 0;
 
   try {
     await client.query('BEGIN');
 
     for (const journey of journeys) {
+      processedJourneys++;
       const seats = seatsByTrain.get(journey.trainId);
       if (!seats) continue;
 
@@ -375,23 +378,17 @@ async function insertBookingsAndTickets(
         carClassMap.set(car.id, car.type);
       }
 
-      // Calculate booking probability based on time slot and day of week
+      // Calculate booking probability based on journey start time
       const journeyHour = journey.date.getUTCHours();
-      const dayOfWeek = journey.date.getDay(); // 0 = Sunday, 5 = Friday
+      const dayOfWeek = journey.date.getDay();
 
-      // Peak hours: 9-10am (hour 1) and 4-5pm (hour 8) in GMT+8
       const isPeakHour = journeyHour === 1 || journeyHour === 8;
       const isFriday = dayOfWeek === 5;
 
-      // Base probability: 80% for peak hours, 30% for off-peak
       let bookingProbability = isPeakHour ? 0.8 : 0.3;
-
-      // Apply 1.2x multiplier for Friday only
       if (isFriday) {
         bookingProbability *= 1.2;
       }
-
-      // Cap at 100% (1.0)
       bookingProbability = Math.min(bookingProbability, 1.0);
 
       // Book calculated percentage of seats
@@ -467,6 +464,11 @@ async function insertBookingsAndTickets(
           ]
         );
         ticketCount++;
+      }
+
+      // Progress indicator
+      if (processedJourneys % 10 === 0 || processedJourneys === totalJourneys) {
+        console.log(`   Processed ${processedJourneys}/${totalJourneys} journeys (${ticketCount} tickets created)...`);
       }
     }
 
