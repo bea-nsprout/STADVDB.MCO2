@@ -18,13 +18,13 @@ export const GET: RequestHandler = async ({ url }) => {
 	const from = getStationIndex(fromStn);
 	const to = getStationIndex(endStn);
 
-	const direction = getDirection(from, to)
+	const direction = getDirection(from, to);
 
 	console.log(from, to, fromStn, endStn, direction);
 	const tsStart = new Date(timeStart);
 	const tsEnd = new Date(timeEnd);
 	console.log(tsStart.toDateString(), tsEnd.toDateString());
-	
+
 	const query = oltpdb
 		.selectFrom('trains')
 		.innerJoin('journeys', 'journeys.train_no', 'trains.id')
@@ -43,20 +43,15 @@ export const GET: RequestHandler = async ({ url }) => {
 		// .where('dept_sched.departure', '>=', sql`${tsStart}::timestamp`)
 		// .where('dept_sched.departure', '<=', sql`${tsEnd}::timestamp`)
 		// .where('routes.direction', '=', direction)
-		.groupBy([
-			'journeys.id',
-			'journeys.train_no',
-			'dept_sched.departure',
-			'arriv_sched.arrival'
-		])
+		.groupBy(['journeys.id', 'journeys.train_no', 'dept_sched.departure', 'arriv_sched.arrival'])
 		.select([
-			'journeys.id as name',
+			'journeys.id as journey_id',
 			'dept_sched.departure as departs',
 			'arriv_sched.arrival as arrives',
-			'journeys.train_no as journey_id'
+			'journeys.train_no as name'
 		]);
 
-	console.log(query.compile().parameters)
+	console.log(query.compile().parameters);
 	const res = await query.execute();
 	console.log(res);
 
