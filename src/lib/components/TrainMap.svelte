@@ -105,7 +105,7 @@
 
 <style>
 	.trainmap {
-		position: relative;
+		position: fixed;
 	}
 
 	.station-line {

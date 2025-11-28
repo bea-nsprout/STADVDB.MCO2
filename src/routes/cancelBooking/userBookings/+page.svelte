@@ -1,12 +1,19 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <script lang="ts">
-	import { invalidate } from '$app/navigation';
 	import Header from '$lib/components/Header.svelte';
     import TrainMap from '$lib/components/TrainMap.svelte';
    
     export let data
 
+    console.log(data.bookings.tickets)
+
+
+    function seatLabel(car: number, row: number, column: number): string {
+	const rowLetter = String.fromCharCode("A".charCodeAt(0) + (row - 1));
+
+	return `${car}-${rowLetter}${column}`;
+    }
     
     let cancelledBooking = 0;
     let cancelledID = "";
@@ -50,10 +57,10 @@ async function deleteBooking(bookingID: string) {
    <div class = "flex flex-row gap-x-30">
         <TrainMap/>
         <div class = "mt-20 flex flex-col gap-y-5"> <!-- Name and Bookings List-->
-            <div class = "text-3xl font-bold text-[var(--color-accent)]">
+            <div class = "text-3xl font-bold text-[var(--color-accent)]" id ="nameContainer">
                  Bookings For {data.email}
             </div> 
-            <div class = "flex flex-col gap-y-5"> <!--Bookings List-->
+            <div class = "flex flex-col gap-y-5" id = "bookingList"> <!--Bookings List-->
                 {#each data.bookings as booking, i}
                 <div class = "Booking"> <!--Booking needs to be looped once db is available-->
                     <div class = "flex flex-row">
@@ -78,9 +85,9 @@ async function deleteBooking(bookingID: string) {
                     <div>
                         <hr class = "bg-black"/>
                     </div>
-                    <div class = "flex flex-row gap-x-40 text-md font-bold">
+                    <div class = "flex flex-row gap-x-47 text-md font-bold">
                         <div>
-                            Train XXXX
+                            Train {booking.tickets[0].train.id}
                         </div>
                         <div>
                             <span class = "text-[var(--color-accent)]">{booking.tickets[0].class}</span> Class
@@ -88,7 +95,7 @@ async function deleteBooking(bookingID: string) {
                         <div>
                             Seat{#if booking.tickets.length > 1} s {/if}: <span class = "text-[var(--color-accent)]">
                                         {#each booking.tickets as ticket}
-                                            {ticket.seat} &nbsp
+                                            {seatLabel(ticket.seat.car, ticket.seat.row, ticket.seat.column)} &nbsp
                                         {/each}
                                   </span>
                         </div>
@@ -201,6 +208,17 @@ async function deleteBooking(bookingID: string) {
     i:hover {
         cursor: pointer;
         color: red;
+    }
+    
+    #bookingList{
+        position:absolute;
+        right:50px;
+        top: 275px;
+    }
+
+    #nameContainer{
+        position:absolute;
+        right:275px;
     }
 
     @-webkit-keyframes slideIn {

@@ -47,6 +47,8 @@ export const GET: RequestHandler = async ({ url }) => {
 					.innerJoin('station as ds', 'ds.id', 'tickets.destination')
 					.innerJoin('schedule as depart_sched', 'depart_sched.station', 'os.name')
 					.innerJoin('schedule as arrive_sched', 'arrive_sched.station', 'ds.name')
+					.innerJoin('trains', 'trains.id', 'journeys.train_no')
+					.innerJoin('seat', 'seat.id', 'tickets.seat')
 					.whereRef('tickets.journey', '=', 'depart_sched.journey_id')
 					.whereRef('tickets.journey', '=', 'arrive_sched.journey_id')
 					.select([
@@ -58,9 +60,18 @@ export const GET: RequestHandler = async ({ url }) => {
 								destination: eb.ref('ds.name'),
 								departure: eb.ref('depart_sched.departure'),
 								arrival: eb.ref('arrive_sched.arrival'),
-								seat: eb.ref('tickets.seat'),
+								seat: jsonBuildObject({
+        						id: eb.ref('seat.id'),
+        						row: eb.ref('seat.row'),
+        						column: eb.ref('seat.column'),
+        						car: eb.ref('seat.car')
+    						}),
 								class: eb.ref('class'),
-								journey_id: eb.ref('journeys.id')
+								journey_id: eb.ref('journeys.id'),
+								train: jsonBuildObject({
+                        			id: eb.ref('trains.id'),
+                        			capacity: eb.ref('trains.capacity')
+                    			})
 							}).as('ticket')
 					])
 			)

@@ -13,7 +13,7 @@
    <Header/>
    <div class = "flex flex-row gap-x-30">
         <TrainMap/>
-        <div class = "mt-20 flex flex-col gap-y-5"> <!--Label and Search Bar-->
+        <div class = "mt-20 flex flex-col gap-y-5" id = "labelsearchBar"> <!--Label and Search Bar-->
             <div class = "text-3xl font-bold text-[var(--color-accent)]">
                 Search Email
             </div>
@@ -24,3 +24,8 @@
         </div>
     </div>
 </div>
+<style>
+    #labelsearchBar {
+        margin-left: 50%;
+    }
+</style>
