@@ -60,6 +60,7 @@ async function deleteBooking(bookingID: string) {
                  Bookings For {data.email}
             </div> 
             <div class = "flex flex-col gap-y-5" id = "bookingList"> <!--Bookings List-->
+            {#if data.bookings?.length > 0}
                 {#each data.bookings as booking, i}
                 <div class = "Booking"> <!--Booking needs to be looped once db is available-->
                     <div class = "flex flex-row">
@@ -112,6 +113,7 @@ async function deleteBooking(bookingID: string) {
                     </div>
                 </div>
                 {/each}
+            {/if}
             </div>
         </div>
     </div>

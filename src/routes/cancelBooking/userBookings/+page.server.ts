@@ -8,7 +8,6 @@ export const load: PageServerLoad = async (event) => {
 
   const bookings = await res.json()
 
-  console.log(bookings[0].tickets);
   return {
     bookings,
     email

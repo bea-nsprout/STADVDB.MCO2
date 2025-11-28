@@ -63,7 +63,7 @@
 	console.log(unavailableSeats)
 
 	function toggleSeat(seatId , rowIndex, colIndex) {
-		const seatObj = { car: carCurrent + offset, row:colIndex+1 , column:rowIndex+1 , seat:seatId };
+		const seatObj = { car: carCurrent + offset, row:colIndex+1 , col:rowIndex+1 , seat:seatId };
 		const existingIndex = selectedSeats.findIndex(
 			s => s.car-offset === carCurrent && s.seat === seatId
 		);
