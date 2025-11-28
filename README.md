@@ -1,14 +1,16 @@
-# STADVDB MCO2 #
+# STADVDB MCO2
 
-__Shinkansen Reservation System__
+**Shinkansen Reservation System**
 
-## S21 Group L Members: ##
-* Helbing, John Patrick
-* Lingat, Carl Vincent Blix
-* Reyes, Jericho Migell
-* Rivera, Paolo Eugene
-* Tan, Ross David
-* Uy, Bea Antoinette
+## S21 Group L Members:
 
-## Presentation Video Link: ##
-(link)
+- Helbing, John Patrick
+- Lingat, Carl Vincent Blix
+- Reyes, Jericho Migell
+- Rivera, Paolo Eugene
+- Tan, Ross David
+- Uy, Bea Antoinette
+
+## 🔗 Presentation Video Link:
+
+[Link to Recording](https://drive.google.com/drive/folders/11uFQc8KIJeDsmVBtV7cQNNAabV0lPPoW?usp=drive_link)
