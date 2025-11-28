@@ -61,17 +61,17 @@ export const GET: RequestHandler = async ({ url }) => {
 								departure: eb.ref('depart_sched.departure'),
 								arrival: eb.ref('arrive_sched.arrival'),
 								seat: jsonBuildObject({
-        						id: eb.ref('seat.id'),
-        						row: eb.ref('seat.row'),
-        						column: eb.ref('seat.column'),
-        						car: eb.ref('seat.car')
-    						}),
+									id: eb.ref('seat.id'),
+									row: eb.ref('seat.row'),
+									column: eb.ref('seat.column'),
+									car: eb.ref('seat.car')
+								}),
 								class: eb.ref('class'),
 								journey_id: eb.ref('journeys.id'),
 								train: jsonBuildObject({
-                        			id: eb.ref('trains.id'),
-                        			capacity: eb.ref('trains.capacity')
-                    			})
+									id: eb.ref('trains.id'),
+									capacity: eb.ref('trains.capacity')
+								})
 							}).as('ticket')
 					])
 			)
@@ -122,17 +122,16 @@ export async function POST({ request }) {
 		cost_total
 	);
 
-
 	const trx = await oltpdb.startTransaction().setIsolationLevel('serializable').execute();
 	try {
 		const { booking_id } = await trx
-    .insertInto('bookings')
-    .values({
-        email,
-        cost_total
-    })
-    .returning((eb) => eb.ref('id').as('booking_id')) 
-    .executeTakeFirstOrThrow();
+			.insertInto('bookings')
+			.values({
+				email,
+				cost_total
+			})
+			.returning((eb) => eb.ref('id').as('booking_id'))
+			.executeTakeFirstOrThrow();
 
 		const promises = await Promise.allSettled(
 			selectedSeats.map(async (val) => {
@@ -143,7 +142,7 @@ export async function POST({ request }) {
 						.where('cars.train_id', '=', train)
 						.where('cars.car_no', '=', val.car)
 						.where('seat.row', '=', val.row)
-						.where('seat.column', '=', val.column)
+						.where('seat.column', '=', val.col)
 						.select('seat.id')
 						.compile().sql
 				);
@@ -155,7 +154,7 @@ export async function POST({ request }) {
 							.where('cars.train_id', '=', train)
 							.where('cars.car_no', '=', val.car)
 							.where('seat.row', '=', val.row)
-							.where('seat.column', '=', val.column)
+							.where('seat.column', '=', val.col)
 							.select('seat.id')
 							.executeTakeFirstOrThrow()
 					).id
@@ -189,7 +188,7 @@ export async function POST({ request }) {
 					.executeTakeFirst();
 
 				if (check != undefined)
-					throw new Error(`Seat already taken! Car ${val.car} Row ${val.row} + Col ${val.column}`);
+					throw new Error(`Seat already taken! Car ${val.car} Row ${val.row} + Col ${val.col}`);
 				else
 					await trx
 						.insertInto('tickets')

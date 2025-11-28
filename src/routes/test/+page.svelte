@@ -6,6 +6,7 @@
 <button
 	onclick={async () => {
 		const body: BookingData = {
+			email: 'jerichoreyes@gmail.com',
 			train: '2',
 			classType: 'Economy',
 			stationFrom: 'Tokyo',
@@ -14,10 +15,9 @@
 				{ car: 3, col: 1, row: 2 },
 				{ car: 3, col: 5, row: 2 }
 			],
-			journey: '62',
 			cost: 6969,
-			email: 'jerichoreyes@gmail.com',
 			cost_total: 6969,
+			journey: '62',
 
 			// the following doesn't matter anymore
 			date: new Date().toISOString(),
