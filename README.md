@@ -11,6 +11,7 @@
 - Tan, Ross David
 - Uy, Bea Antoinette
 
-## 🔗 Presentation Video Link:
+## 🔗 Pertinent Links:
 
-[Link to Recording](https://drive.google.com/drive/folders/11uFQc8KIJeDsmVBtV7cQNNAabV0lPPoW?usp=drive_link)
+- [Google Drive Recording](https://drive.google.com/drive/folders/11uFQc8KIJeDsmVBtV7cQNNAabV0lPPoW?usp=drive_link)
+- [K6 Results](/docker/k6/results)
