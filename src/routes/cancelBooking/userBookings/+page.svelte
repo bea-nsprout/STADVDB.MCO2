@@ -10,9 +10,9 @@
 
 
     function seatLabel(car: number, row: number, column: number): string {
-	const rowLetter = String.fromCharCode("A".charCodeAt(0) + (row - 1));
+	const rowLetter = String.fromCharCode("A".charCodeAt(0) + (column));
 
-	return `${car}-${rowLetter}${column}`;
+	return `${car}-${rowLetter}${row}`;
     }
     
     let cancelledBooking = 0;
@@ -28,8 +28,7 @@
     }
 
 async function deleteBooking(bookingID: string) {
-    console.log(bookingID)
-  const res = await fetch('/api/bookings', {
+    const res = await fetch('/api/bookings', {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'

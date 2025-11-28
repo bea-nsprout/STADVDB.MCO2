@@ -28,6 +28,8 @@
 	const backToSeatsUrl = $derived(
 		`/book/step2-seats?train=${booking.train}&class=${booking.classType}&seats=${booking.passengers}&from=${booking.stationFrom}&to=${booking.stationTo}`
 	);
+
+	
 </script>
 
 {#if form?.success}
@@ -148,6 +150,9 @@
 					<input type="hidden" name="stationTo" value={booking.stationTo} />
 					<input type="hidden" name="passengers" value={booking.passengers} />
 					<input type="hidden" name="seats" value={JSON.stringify(booking.selectedSeats)} />
+					<input type ="hidden" name = "cost_total" value = {priceTotal}>
+					<input type="hidden" name="cost" value={price} />
+					<input type="hidden" name="journey" value={booking.journey} />
 					<input type="hidden" name="timeDepart" value="" />
 					<input type="hidden" name="timeArrive" value="" />
 

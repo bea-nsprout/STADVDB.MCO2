@@ -14,6 +14,16 @@
 	const carsTotal = 3;
 	let carCurrent = $state(1);
 
+	let offset = 0;
+
+	if($bookingStore.classType === "Economy") {
+		offset = 2
+	}
+
+	else if($bookingStore.classType === "Business"){
+		offset = 1
+	}
+
 	// disabling car next/previous buttons
 	const arrowsDisabled = $derived([carCurrent === 1, carCurrent === carsTotal]);
 
@@ -52,25 +62,26 @@
 
 	console.log(unavailableSeats)
 
-	function toggleSeat(seatId) {
-		const seatObj = { car: carCurrent, seat: seatId };
+	function toggleSeat(seatId , rowIndex, colIndex) {
+		const seatObj = { car: carCurrent + offset, row:colIndex+1 , column:rowIndex+1 , seat:seatId };
 		const existingIndex = selectedSeats.findIndex(
-			s => s.car === carCurrent && s.seat === seatId
+			s => s.car-offset === carCurrent && s.seat === seatId
 		);
 
 		if (existingIndex >= 0) {
 			selectedSeats.splice(existingIndex, 1);
 		} else {
 			selectedSeats.push(seatObj);
+			console.log(selectedSeats)
 		}
 	}
 
 	function isSeatSelected(seatId) {
-		return selectedSeats.some(s => s.car === carCurrent && s.seat === seatId);
+		return selectedSeats.some(s => s.car-offset === carCurrent && s.seat === seatId);
 	}
 
 	function isSeatUnavailable(seatId) {
-		return unavailableSeats.some(s => s.car === carCurrent && s.seat === seatId);
+		return unavailableSeats.some(s => s.car-offset === carCurrent && s.seat === seatId);
 	}
 
 	let classColor = "black";
@@ -177,7 +188,7 @@
 						class:selected={isSeatSelected(seatId)}
 						class:available={!isSeatSelected(seatId) && !isSeatUnavailable(seatId)}
 						disabled={isSeatUnavailable(seatId)}
-						onclick={() => toggleSeat(seatId)}
+						onclick={() => toggleSeat( seatId , rowIndex, colIndex)}
 						aria-label="Seat {seatId}">
 						{seatId}
 					</button>
@@ -200,7 +211,7 @@
 						class:selected={isSeatSelected(seatId)}
 						class:available={!isSeatSelected(seatId) && !isSeatUnavailable(seatId)}
 						disabled={isSeatUnavailable(seatId)}
-						onclick={() => toggleSeat(seatId)}
+						onclick={() => toggleSeat( seatId , rowIndex, colIndex)}
 						aria-label="Seat {seatId}">
 						{seatId}
 					</button>
